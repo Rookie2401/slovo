@@ -86,5 +86,29 @@ Tests: fixture dictionary (in-test `DictLexeme`s for ~40 words); each rule with 
 Port the Hindi reader's UI to Russian against the contract: Dexie schema (tables in `types.ts` incl. `characters`, `parallel_texts`; DB name `slovo`), `analysis.ts` (`ensureChapterAnalysis` must `preloadForms` for the chapter's keys, then call `analyzeSentence` with the dictionary accessors and `character()` lookup; corrections re-applied; version tags), settings (`stressMarks: 'always'|'tap'|'unknown'|'never'`, `translitMode`, `englishParallel: boolean` default false, `lookupMarksRecognized`, `autoKnownAfter`, `yoDisplay`), Home = the ladder (six levels, works with word counts, "Add to my shelf" fetch-on-demand with progress, resume), Reader (Prose with tappable words, stress marks per setting rendered as combining acute over `surface_normalized` when the chosen candidate has `features.stress ≥ 0` — never on guesses; unknown-letter tints per decodability; encounters on scroll; chapter nav; English parallel pane collapsed at the bottom of each chapter — paragraphs only, never interleaved), WordPanel (level 1: surface with stress, pronunciation + confidence, gloss, lemma with stress, pos + features in plain English ("genitive singular — because of у"), status control; level 2: morpheme chips, notes, aspect partner, ambiguity alternatives, "guess" badge, Correct form; level 3: full paradigm table with stress from B's `lexeme()`, senses, frequency rank, concordance in this book, encounter history), SentencePanel (clause sketch, constructions, aspect note, word-order note, Claude explanation with the user's key), Names screen per book (cast + detected), Vocabulary, Chapter prep (new words / constructions / names before a chapter), Import (EPUB/HTML/TXT/JSON, DRM refused), Settings (sources & licences: OpenRussian CC BY-SA 4.0, hermitdave FrequencyWords CC BY-SA 4.0, lib.ru, Wikisource, Project Gutenberg), Onboarding (script level + stress/translit modes), UpdateToast. Fonts: vendor PT Serif cyrillic+latin (400/700, normal+italic) and EB Garamond cyrillic 400/600 + italic; `--font-text: 'PT Serif'`. PWA manifest name "Слово", lang ru; workbox `globIgnores` the corpus and dict shards (fetched on demand, runtime-cached with a versioned cache name — copy Biblia's `dataVersion`/`cleanupCaches` pattern). Routes: `#/`, `#/read/:bookId/:chapterIndex`, `#/word/:key`, `#/names/:bookId`, `#/alphabet`, `#/vocabulary`, `#/import`, `#/settings`.
 Tests: persistence (fake-indexeddb), import of a small Russian text, a rendered Reader smoke test (jsdom, `matchMedia`/`IntersectionObserver` stubs; navigation through a `useNavigate` bridge, never by remounting `MemoryRouter`).
 
+## Status (2026-09-22, end of V0 build)
+
+Done and verified in the browser (dev server and the production build): onboarding → ladder in
+curated order → add a work (progress, resume) → chapter prep → reader with tappable words →
+three-level word card (stress, gloss, chips, aspect partner, pronunciation with the rule that
+fired, paradigm table with stress, frequency rank, encounters, provenance) → sentence panel
+(aspect per verb with partner, agreement, -ся reading flagged uncertain, prepositional phrases,
+word order) → Names screen (curated casts, forms verified against the text) → English parallel
+(collapsed, off by default) → Alphabet (11 stages) → Settings with sources and exact coverage.
+Coverage figures live in `src/data/engine-coverage.json` (see ARCHITECTURE → Measuring).
+
+Integration fixes worth knowing: optional corpus files must be probed by content type (the dev
+server and the PWA navigate fallback answer 404s with `index.html`, status 200); frequency
+tables upsert inside one transaction with an in-flight memo (a plain `put` on the unique `key`
+index crashed the Home screen after a large add); `addParallel` is idempotent; heading
+paragraphs that repeat the chapter title are not shown twice; lib.ru prints Tolstoy's чтò with a
+Latin ò (tokenizer maps it to о + grave and counts it as a source stress); War and Peace's
+lib.ru edition appends 74k words of textual-variant apparatus (stripped at build).
+
+Known limits carried into V1: clauses are split, not attached, and NP-internal «и» can still
+split a clause; War and Peace's bundle is 6.9 MB (per-chapter bundles would fix it); a few
+dictionary gaps remain (казать, счастие/годы case forms); service-worker registration could not
+be exercised in the desktop browser pane this session — check the installed app on a phone.
+
 ## Integration (top level, after A–E)
 `npx tsc -b` clean → `npm test` → `npm run corpus:fetch && npm run corpus:build && npm run dict:build` → coverage figures into README/Settings → `npm run build` → verify in the browser (Home ladder, add "Первая русская книга для чтения", read, tap words, stress, paradigm, names, English pane, alphabet stage) → Desktop launch.json entries `slovo-dev` (5188) / `slovo-preview` (4188) → commit → GitHub Pages `Rookie2401/slovo` (orphan `gh-pages` = dist; corpus is public domain so the full library may be published).

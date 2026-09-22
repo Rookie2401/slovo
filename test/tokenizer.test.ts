@@ -37,6 +37,20 @@ describe('tokenize', () => {
     for (const tok of tokenize(src)) expect(src.slice(tok.start, tok.end)).toBe(tok.text);
   });
 
+  it('keeps lib.ru-style Latin accented vowels and precomposed ѐ inside a word, as source stress', () => {
+    const t = tokenize('Чтò же, бòльшая часть, voilà — гдѐ он?');
+    const words = t.filter((x) => x.kind === 'word').map((x) => x.text);
+    expect(words).toEqual(['Чтò', 'же', 'бòльшая', 'часть', 'гдѐ', 'он']);
+    expect(t.find((x) => x.kind === 'latin')?.text).toBe('voilà');
+    expect(normalize('Чтò')).toBe('Что');
+    expect(sourceStressIndex('Чтò')).toBe(2);
+    expect(normalize('бòльшая')).toBe('большая');
+    expect(sourceStressIndex('бòльшая')).toBe(1);
+    expect(normalize('гдѐ')).toBe('где');
+    expect(sourceStressIndex('гдѐ')).toBe(2);
+    expect(looseKey('Чтò')).toBe('что');
+  });
+
   it('keeps combining stress marks inside a word token', () => {
     const src = 'Фили́пок пошёл в шко́лу.';
     const words = tokenize(src).filter((x) => x.kind === 'word');

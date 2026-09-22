@@ -39,6 +39,13 @@ add('будто', 'будто', 'as if', ['subordinating: unreal comparison']);
 add('либо', 'либо', 'or (either…or)', ['coordinating, often doubled: либо…либо']);
 add('ни', 'ни', 'neither/nor (doubled)', ['coordinating when doubled: ни…ни — see also the negation particle ни']);
 
+// archaic/dialect aliases (19th-century and folk-tale texts)
+add('али', 'или', 'or', ['coordinating: dialect/folk variant of или']);
+add('ежели', 'если', 'if', ['subordinating: archaic/folk variant of если']);
+add('коли', 'если', 'if / since', ['subordinating: archaic/folk variant of если']);
+add('дабы', 'чтобы', 'so that / in order to', ['subordinating: archaic/bookish variant of чтобы']);
+add('ибо', 'ибо', 'for, because', ['subordinating: literary/archaic — gives a reason, like потому что']);
+
 export function conjunctionCandidates(key: string): Candidate[] {
   return INDEX.get(key) ?? [];
 }

@@ -27,6 +27,8 @@ function whole(text: string, gloss: string, start: number, end: number): Morphem
 /** Adjective-type case/gender/number endings, longest first so "ими" is tried before "и". */
 const ADJ_ENDINGS: Array<[string, MorphFeatures]> = [
   ['ого', { gender: 'm', number: 'sg', case: 'gen' }], ['ому', { gender: 'm', number: 'sg', case: 'dat' }],
+  // soft-stem equivalents (прежний -> прежнего/прежнему, синий -> синего/синему)
+  ['его', { gender: 'm', number: 'sg', case: 'gen' }], ['ему', { gender: 'm', number: 'sg', case: 'dat' }],
   ['ыми', { number: 'pl', case: 'inst' }], ['ими', { number: 'pl', case: 'inst' }],
   ['ых', { number: 'pl', case: 'gen' }], ['их', { number: 'pl', case: 'gen' }],
   ['ым', { gender: 'm', number: 'sg', case: 'inst' }], ['им', { gender: 'm', number: 'sg', case: 'inst' }],
@@ -204,7 +206,13 @@ function gerundGuess(surface: string, ctx: AnalysisContext): Candidate[] {
     // (говор-я -> говор, + -ить = говорить) — so both a bare -ть/-ться and the four full
     // endings are tried; whichever matches a real dictionary verb wins.
     const endings = reflexive ? ['ться', 'аться', 'яться', 'еться', 'иться'] : ['ть', 'ать', 'ять', 'еть', 'ить'];
-    const infinitives = endings.map((e) => stem.toLowerCase() + e);
+    // -овать/-евать verbs (чувствовать, рисовать, советовать…) alternate their stem before
+    // -ть (чувствова-) and before the personal endings (чувству-ют): no infinitive-shaped
+    // reconstruction from the gerund stem can recover "чувствовать", so the presfut 3pl form
+    // (which IS built directly on the gerund's own stem, чувству- + -ют) is tried as a
+    // fallback search key — ctx.lexeme() then still returns the real lemma чувствовать.
+    const presfutPl3 = reflexive ? ['ются', 'утся', 'ятся', 'атся'] : ['ют', 'ут', 'ят', 'ат'];
+    const infinitives = [...endings.map((e) => stem.toLowerCase() + e), ...presfutPl3.map((e) => stem.toLowerCase() + e)];
     const known = firstKnown(infinitives, ctx, 'verb');
     const morphemes: Morpheme[] = [whole(stem, 'verb stem', 0, stem.length), { text: surface.slice(-suf.length), role: 'suffix', gloss: 'present gerund suffix', start: stem.length, end: surface.length }];
     // present gerund is a low-priority guess unless the base verb is confirmed known: -я/-а
@@ -489,26 +497,6 @@ function endingPatternGuess(surface: string): Candidate[] {
     out.push(mk(surface, 'verb', { verb_form: 'infinitive' }, 'ends in -ти (с/з/й-stem): looks like an infinitive', 0.5, 'ти'));
     return out;
   }
-  if (/[аяоуыи]л[аои]?$/.test(lower) && /л[аои]?$/.test(lower)) {
-    const m = /(л|ла|ло|ли)$/.exec(lower)!;
-    const end = m[1]!;
-    // bare -л (no vowel after it) is masculine singular, matching -ла/-ло/-ли (fem/neut/plural);
-    // only -ли carries no gender (plural).
-    const gender: Gender | undefined = end === 'ла' ? 'f' : end === 'ло' ? 'n' : end === 'л' ? 'm' : undefined;
-    const number: Number_ | undefined = end === 'ли' ? 'pl' : 'sg';
-    const stem = surface.slice(0, -end.length);
-    const lemma = `${stem}ть`;
-    // -нул/-нула/-нуло/-нули reconstructs a -нуть verb (толкнуть, прыгнуть, избегнуть…): this
-    // semelfactive/inchoative class is characteristically perfective, so a guessed reading here
-    // still carries enough for aspect.ts/clause.ts to treat it as a normal finite predicate.
-    const isNu = /ну$/i.test(stem);
-    const features: MorphFeatures = { verb_form: 'past', gender, number, ...(isNu ? { aspect: 'perfective' as const } : {}) };
-    const note = isNu
-      ? 'ends in -нул/-нула/-нуло/-нули: a semelfactive/inchoative verb in -нуть, characteristically perfective'
-      : 'ends in -л/-ла/-ло/-ли: looks like a past-tense verb';
-    out.push(mk(lemma, 'verb', features, note, 0.45, end));
-    return out;
-  }
   const adj = splitAdjEnding(surface);
   if (adj) {
     out.push(mk(adj.base.toLowerCase() + 'ый', 'adjective', adj.features, 'adjective-shaped ending: guessed agreement from the ending alone', 0.5, adj.ending));
@@ -623,21 +611,104 @@ function poAdverbGuess(surface: string): Candidate[] {
     { text: surface.slice(0, 2), role: 'prefix', gloss: 'по- (manner adverb)', start: 0, end: 2 },
     whole(rest, 'base', 2, surface.length),
   ];
+  // no leading "?": these are deterministic rule matches at 0.95, not low-confidence guesses —
+  // an unmarked key here previously kept them counted as "unresolved" in sentence-level coverage.
   if (lowerRest.endsWith('ски') && rest.length > 3) {
     const base = rest.slice(0, -3);
     return [{
-      key: `?adverb:${lower}`, lemma: surface, pos: 'adverb', gloss: `in a ${base}-ish way / in ${base}`, features: {}, morphemes,
+      key: `adverb:${lower}`, lemma: surface, pos: 'adverb', gloss: `in a ${base}-ish way / in ${base}`, features: {}, morphemes,
       notes: ['по- + -ски: adverb of manner ("in X fashion/language")'], source: 'rule', confidence: 0.95,
     }];
   }
   const glossBase = PO_DATIVE_ADVERBS[lowerRest];
   if (glossBase) {
     return [{
-      key: `?adverb:${lower}`, lemma: surface, pos: 'adverb', gloss: glossBase, features: {}, morphemes,
+      key: `adverb:${lower}`, lemma: surface, pos: 'adverb', gloss: glossBase, features: {}, morphemes,
       notes: [`по- + dative ${rest}: adverb of manner`], source: 'rule', confidence: 0.95,
     }];
   }
   return [];
+}
+
+/**
+ * Past tense (был/была/было/были-shaped), including reflexive forms (-лся/-лась/-лось/-лись:
+ * удалось, вернулся) — checks the dictionary for the reconstructed infinitive first (rule,
+ * 0.85), falling back to the same shape of guess the old ending-pattern fallback used to make
+ * unconditionally (0.45) when the base verb is not known.
+ */
+function pastTenseGuess(surface: string, ctx: AnalysisContext): Candidate[] {
+  const lower = surface.toLowerCase();
+  const m = /^(.+?)(л|ла|ло|ли)(ся|сь)?$/.exec(lower);
+  if (!m) return [];
+  const [, stemLower, end, postfix] = m;
+  if (!/[аяоуыи]$/.test(stemLower!)) return []; // a genuine past-tense marker needs a vowel before -л (стол is not "сто" + л)
+  const stem = surface.slice(0, stemLower!.length);
+  const reflexive = !!postfix;
+  const gender: Gender | undefined = end === 'ла' ? 'f' : end === 'ло' ? 'n' : end === 'л' ? 'm' : undefined;
+  const number: Number_ | undefined = end === 'ли' ? 'pl' : 'sg';
+  const lemma = reflexive ? `${stem}ться` : `${stem}ть`;
+  const known = firstKnown([lemma], ctx, 'verb');
+  const isNu = /ну$/i.test(stem);
+  const features: MorphFeatures = { verb_form: 'past', gender, number, reflexive: reflexive || undefined, ...(isNu ? { aspect: 'perfective' as const } : {}) };
+  const morphemes: Morpheme[] = [whole(stem, 'verb stem', 0, stem.length), { text: surface.slice(stem.length, stem.length + end!.length), role: 'ending', gloss: 'past tense ending', start: stem.length, end: stem.length + end!.length }];
+  if (postfix) morphemes.push({ text: surface.slice(stem.length + end!.length), role: 'postfix', gloss: 'reflexive/middle marker', start: stem.length + end!.length, end: surface.length });
+  return [ruleOrGuess({
+    surface, known, guessLemma: lemma, guessPos: 'verb', features, morphemes,
+    ruleGloss: (lex) => `${lex.gloss} (past${reflexive ? ', reflexive' : ''})`,
+    ruleNote: (lex) => `past tense: generated from the known verb ${lex.lemma}${isNu ? ' (-нуть class, characteristically perfective)' : ''}`,
+    guessGloss: 'past-tense verb (?)', guessNote: `ends in -${end}${postfix ?? ''}: looks like a past-tense verb`,
+    ruleConfidence: 0.85, guessConfidence: 0.45,
+  })];
+}
+
+/**
+ * Short passive past participles used impersonally/predicatively (сказано, сделано,
+ * написано, решено, велено — "было сказано" = "it was said"): neuter singular only, built on
+ * a known perfective (or imperfective, for велено-type) verb.
+ */
+const SHORT_PASSIVE_ENDINGS: Array<[string, string[]]> = [
+  ['ано', ['ать']], ['яно', ['ять']], ['ено', ['ить', 'еть']], ['ёно', ['ить', 'еть']], ['то', ['ть']],
+];
+
+function shortPassiveParticipleGuess(surface: string, ctx: AnalysisContext): Candidate[] {
+  const lower = surface.toLowerCase();
+  for (const [suf, infEndings] of SHORT_PASSIVE_ENDINGS) {
+    if (!lower.endsWith(suf) || surface.length <= suf.length + 1) continue;
+    const stem = surface.slice(0, -suf.length);
+    const infinitives = infEndings.map((e) => stem.toLowerCase() + e);
+    const known = firstKnown(infinitives, ctx, 'verb');
+    const morphemes: Morpheme[] = [whole(stem, 'verb stem', 0, stem.length), { text: surface.slice(-suf.length), role: 'ending', gloss: 'short passive participle ending (neuter)', start: stem.length, end: surface.length }];
+    if (known) {
+      return [ruleOrGuess({
+        surface, known, guessLemma: known.base, guessPos: 'verb',
+        features: { verb_form: 'participle-short', voice: 'passive', gender: 'n', degree: 'short' }, morphemes,
+        ruleGloss: (lex) => `it is/was ${lex.gloss.replace(/^to /, '')}ed — short passive participle of ${lex.lemma}`,
+        ruleNote: () => `predicative: "it is/was ${surface}" — short neuter passive participle, generated from the known verb ${known.lex.lemma}`,
+        guessGloss: '', guessNote: '', ruleConfidence: 0.85, guessConfidence: 0.5,
+      })];
+    }
+  }
+  return [];
+}
+
+/**
+ * An inflected form of an adjective whose dictionary entry carries NO paradigm (прежний,
+ * собачий, бумажный — the citation-form-fallback lexemes the coordinator's B-side notes
+ * describe): when the reconstructed nominative citation form (stem + -ий/-ый/-ой) matches a
+ * known adjective lexeme, decline it by rule.
+ */
+function adjectiveDeclineGuess(surface: string, ctx: AnalysisContext): Candidate[] {
+  const split = splitAdjEnding(surface);
+  if (!split) return [];
+  const { base, ending, features } = split;
+  const known = firstKnown([`${base}ий`, `${base}ый`, `${base}ой`], ctx, 'adjective');
+  if (!known) return [];
+  const morphemes: Morpheme[] = [whole(surface.slice(0, base.length), 'adjective stem', 0, base.length), { text: ending, role: 'ending', gloss: endingGloss(features), start: base.length, end: surface.length }];
+  return [{
+    key: known.id, lemma: known.lex.lemma, pos: 'adjective', gloss: known.lex.gloss, senses: known.lex.senses,
+    features, morphemes, notes: [`declined by rule — the dictionary has no table for this adjective (${known.lex.lemma})`],
+    source: 'rule', confidence: 0.9,
+  }];
 }
 
 /** Every rule generator, run in order; the first that produces a result wins (each already falls back to a guess internally when its base word is unknown). */
@@ -650,10 +721,14 @@ export function ruleGuesses(surface: string, ctx: AnalysisContext): Candidate[] 
   if (poAdverb.length) return poAdverb;
   const hyphenClitic = hyphenatedCliticGuess(surface, ctx);
   if (hyphenClitic.length) return hyphenClitic;
+  const shortPassive = shortPassiveParticipleGuess(surface, ctx);
+  if (shortPassive.length) return shortPassive;
+  const pastTense = pastTenseGuess(surface, ctx);
+  if (pastTense.length) return pastTense;
   // superlative/comparative checked before participle: their -ейш-/-айш-/-ее/-ей
   // markers are more specific than the participle rules' bare -ш suffix, which
   // would otherwise wrongly claim any word ending in -ейший (быстрейший).
-  const chain = [superlativeGuess, comparativeGuess, participleGuess, gerundGuess, prefixedVerbGuess, possessiveAdjectiveGuess, diminutiveGuess, adverbGuess];
+  const chain = [superlativeGuess, comparativeGuess, adjectiveDeclineGuess, participleGuess, gerundGuess, prefixedVerbGuess, possessiveAdjectiveGuess, diminutiveGuess, adverbGuess];
   for (const fn of chain) {
     const r = fn(surface, ctx);
     if (r.length) return r;

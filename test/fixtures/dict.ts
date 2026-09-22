@@ -168,6 +168,26 @@ const LEXEMES: DictLexeme[] = [
     paradigm: { kind: 'verb', infinitive: 'слышать', past: { m: 'слышал', f: 'слышала', n: 'слышало', pl: 'слышали' }, presfut: { sg1: 'слышу', sg2: 'слышишь', sg3: 'слышит', pl1: 'слышим', pl2: 'слышите', pl3: 'слышат' } },
   },
   {
+    id: 'verb:чувствовать', lemma: 'чувствовать', acc: 'чувствовать', pos: 'verb', gloss: 'to feel', senses: ['to feel'], aspect: 'imperfective', partner: 'verb:почувствовать', rank: 180,
+    paradigm: { kind: 'verb', infinitive: 'чувствовать', past: { m: 'чувствовал', f: 'чувствовала', n: 'чувствовало', pl: 'чувствовали' }, presfut: { sg1: 'чувствую', sg2: 'чувствуешь', sg3: 'чувствует', pl1: 'чувствуем', pl2: 'чувствуете', pl3: 'чувствуют' } },
+  },
+  {
+    id: 'verb:решить', lemma: 'решить', acc: 'решить', pos: 'verb', gloss: 'to decide', senses: ['to decide'], aspect: 'perfective', partner: 'verb:решать', rank: 320,
+    paradigm: { kind: 'verb', infinitive: 'решить', past: { m: 'решил', f: 'решила', n: 'решило', pl: 'решили' } },
+  },
+  {
+    id: 'verb:удаться', lemma: 'удаться', acc: 'удаться', pos: 'verb', gloss: 'to succeed, work out', senses: ['to succeed, turn out well'], aspect: 'perfective', partner: 'verb:удаваться', reflexive: true, rank: 900,
+    // only the infinitive is registered (matches a B-side dump row with a thin paradigm), so
+    // "удалось" must be reconstructed by morphology/guess.ts's pastTenseGuess rule, not found
+    // directly in the dictionary — this is what package D's regression test exercises.
+    paradigm: { kind: 'verb', infinitive: 'удаться' },
+  },
+  {
+    id: 'adjective:прежний', lemma: 'прежний', acc: 'прежний', pos: 'adjective', gloss: 'former, previous', senses: ['former, previous'], rank: 700,
+    // no paradigm: matches package B's "citation-form fallback" for a dump row with an empty
+    // paradigm — only the bare lemma is indexed, so прежнего/прежних must be declined by rule.
+  },
+  {
     id: 'verb:хотеть', lemma: 'хотеть', acc: 'хотеть', pos: 'verb', gloss: 'to want', senses: ['to want, wish'], aspect: 'imperfective', rank: 30,
     paradigm: { kind: 'verb', infinitive: 'хотеть', past: { m: 'хотел', f: 'хотела', n: 'хотело', pl: 'хотели' }, presfut: { sg1: 'хочу', sg2: 'хочешь', sg3: 'хочет', pl1: 'хотим', pl2: 'хотите', pl3: 'хотят' } },
   },

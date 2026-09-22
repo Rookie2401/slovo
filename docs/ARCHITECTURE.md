@@ -47,6 +47,29 @@ runtime
           → apply user_corrections
 ```
 
+## Dictionary delivery
+
+A chapter's forms span nearly every letter, so letter-sharded lookups would pull ~40 MB of
+form shards and hundreds of lexeme shards before the first tap. The build therefore also
+writes one **per-work bundle** (`public/dict/works/<slug>.json`: the work's form index +
+core lexeme entries without paradigms, 1–7 MB, fetched once, runtime-cached by the service
+worker). `preloadWork(slug)` is the reader's fast path; the letter shards remain for the
+on-demand paradigm view (`lexeme(id)`, longest-prefix shard resolution) and for user imports
+(`preloadForms`). Stem/ending/postfix segmentation is one shared per-form rule
+(`src/dictionary/segment.ts`: stem = common prefix of the surface base and the lemma base,
+floored at two letters; suppletive forms left whole) used by both the runtime `candidatesFor`
+and the engine bridge, so the chips a learner sees are exactly what the engine computed.
+Data errors in the dump are corrected at build time from `data/curated/dict-overrides.json`.
+
+## Measuring
+
+* `scripts/engine-coverage.mts` — word by word, no sentence context: dictionary / closed-class /
+  rule / guess shares per work.
+* `scripts/sentence-coverage.mts` — the full sentence analysis with the cast index, i.e. what the
+  reader shows; writes `src/data/engine-coverage.json` (quoted in Settings and the README).
+* `scripts/probe-engine.mts <slug> <chapter> <paragraph>` and `scripts/probe-word.mts <word>` —
+  print the engine's picks on real text with the real shards (`npx vite-node …`).
+
 ## Linguistic model
 
 * **Nouns** — six cases + second locative / partitive / vocative; three genders; animacy decides

@@ -253,6 +253,139 @@ describe('rule generation: diminutives', () => {
   });
 });
 
+describe('rule generation: -овать/-евать present gerunds (presfut pl3 fallback)', () => {
+  it('positive: чувствуя — present gerund of чувствовать, recovered via the presfut 3pl stem чувству-', () => {
+    const c = analyze('чувствуя')[0]!;
+    expect(c.lemma).toBe('чувствовать');
+    expect(c.features.verb_form).toBe('gerund-pres');
+    expect(c.confidence).toBe(0.8);
+  });
+  it('negative: an -овать-shaped gerund with no known base is a low-confidence guess', () => {
+    const c = analyze('пузырствуя')[0]!;
+    expect(c.confidence).toBeLessThanOrEqual(0.55);
+  });
+});
+
+describe('rule generation: short passive participles used predicatively (сказано, решено)', () => {
+  it('positive: сказано — short neuter passive participle of the known verb сказать', () => {
+    const c = analyze('сказано')[0]!;
+    expect(c.lemma).toBe('сказать');
+    expect(c.features).toMatchObject({ verb_form: 'participle-short', gender: 'n', degree: 'short', voice: 'passive' });
+    expect(c.confidence).toBe(0.85);
+    expect(c.gloss).toMatch(/it is\/was/);
+  });
+  it('positive: решено — short neuter passive participle of the known verb решить (-ено ending)', () => {
+    const c = analyze('решено')[0]!;
+    expect(c.lemma).toBe('решить');
+    expect(c.features.verb_form).toBe('participle-short');
+  });
+  it('negative: an unknown-base short-participle-shaped word falls to a lower-confidence guess', () => {
+    const c = analyze('пузырено')[0]!;
+    expect(c.confidence).toBeLessThan(0.85);
+  });
+});
+
+describe('past tense, including reflexive (удалось, вернулся)', () => {
+  it('positive: удалось — reflexive past neuter of the known verb удаться, not a generic guess', () => {
+    const c = analyze('удалось')[0]!;
+    expect(c.lemma).toBe('удаться');
+    expect(c.features).toMatchObject({ verb_form: 'past', gender: 'n', reflexive: true });
+    expect(c.confidence).toBe(0.85);
+  });
+  it('negative: an unknown plain-past-shaped word (no reflexive postfix) is a lower-confidence guess', () => {
+    const c = analyze('пузырило')[0]!;
+    expect(c.confidence).toBeLessThanOrEqual(0.55);
+  });
+  it('negative: an unknown reflexive-past-shaped word (-лся/-лось) is a lower-confidence guess', () => {
+    const c = analyze('пузырился')[0]!;
+    expect(c.confidence).toBeLessThanOrEqual(0.55);
+    expect(analyze('пузырилось')[0]!.confidence).toBeLessThanOrEqual(0.55);
+  });
+});
+
+describe('rule generation: adjectives with no dictionary paradigm, declined by rule', () => {
+  it('positive: прежнего — genitive singular of the known but paradigm-less adjective прежний', () => {
+    const c = analyze('прежнего')[0]!;
+    expect(c.lemma).toBe('прежний');
+    expect(c.features).toMatchObject({ case: 'gen', gender: 'm' });
+    expect(c.confidence).toBe(0.9);
+    expect(c.notes.join(' ')).toMatch(/declined by rule/);
+  });
+  it('positive: прежних — genitive/prepositional plural of прежний', () => {
+    const c = analyze('прежних')[0]!;
+    expect(c.lemma).toBe('прежний');
+    expect(c.features.number).toBe('pl');
+  });
+  it('negative: an unknown adjective-shaped word is not declined by this rule', () => {
+    const c = analyze('пузырчатого')[0]!;
+    expect(c.confidence).toBeLessThan(0.9);
+  });
+});
+
+describe('closed-class numerals: оба/обе and oblique forms', () => {
+  it('positive: оба (m) / обе (f) and their oblique forms (обоих/обеих/обоим/обеим/обоими/обеими)', () => {
+    expect(analyze('оба').find((x) => x.pos === 'numeral')!.features.gender).toBe('m');
+    expect(analyze('обе').find((x) => x.pos === 'numeral')!.features.gender).toBe('f');
+    expect(analyze('обоих').find((x) => x.pos === 'numeral' && x.lemma === 'оба')).toBeDefined();
+    expect(analyze('обеих').find((x) => x.pos === 'numeral' && x.lemma === 'обе')).toBeDefined();
+    expect(analyze('обоим').find((x) => x.pos === 'numeral')!.features.case).toBe('dat');
+    expect(analyze('обеими').find((x) => x.pos === 'numeral')!.features.case).toBe('inst');
+  });
+  it('positive: oblique cardinals десяти/двадцати/пяти/сорока/ста/трёх/семи', () => {
+    for (const w of ['десяти', 'двадцати', 'пяти', 'сорока', 'ста', 'трёх', 'семи']) {
+      const c = analyze(w).find((x) => x.pos === 'numeral');
+      expect(c, w).toBeDefined();
+      expect(c!.features.case).not.toBe('nom');
+    }
+  });
+  it('positive: двухсот — oblique (genitive) of двести', () => {
+    const c = analyze('двухсот').find((x) => x.pos === 'numeral')!;
+    expect(c).toBeDefined();
+    expect(c.lemma).toBe('двести');
+    expect(c.features.case).toBe('gen');
+  });
+  it('positive: collective oblique двоих/троих/четверых', () => {
+    for (const w of ['двоих', 'троих', 'четверых']) {
+      const c = analyze(w).find((x) => x.pos === 'numeral');
+      expect(c, w).toBeDefined();
+      expect(c!.features.case).not.toBe('nom');
+    }
+  });
+});
+
+describe('archaic/dialect closed-class aliases', () => {
+  it('positive: чрез = через (governs accusative)', () => {
+    const c = analyze('чрез').find((x) => x.pos === 'preposition')!;
+    expect(c).toBeDefined();
+    expect(c.features.case).toBe('acc');
+  });
+  it('positive: ежели/коли = если (subordinating conjunction)', () => {
+    expect(analyze('ежели').find((x) => x.pos === 'conjunction')!.lemma).toBe('если');
+    expect(analyze('коли').find((x) => x.pos === 'conjunction')!.lemma).toBe('если');
+  });
+  it('positive: дабы = чтобы', () => {
+    expect(analyze('дабы').find((x) => x.pos === 'conjunction')!.lemma).toBe('чтобы');
+  });
+  it('positive: сей/сия/сие decline like этот, pronoun_type demonstrative', () => {
+    const c = analyze('сего').find((x) => x.lemma === 'сей')!;
+    expect(c).toBeDefined();
+    expect(c.features).toMatchObject({ case: 'gen', gender: 'm' });
+  });
+  it('positive: оный declines like a regular hard adjective', () => {
+    const c = analyze('оного').find((x) => x.lemma === 'оный')!;
+    expect(c).toBeDefined();
+    expect(c.features.case).toBe('gen');
+  });
+  it('positive: по-прежнему/по-моему/по-русски resolve without a "?" key (sentence-level coverage counts them as resolved)', () => {
+    for (const w of ['по-прежнему', 'по-моему', 'по-русски']) {
+      const c = analyze(w)[0]!;
+      expect(c.pos).toBe('adverb');
+      expect(c.key.startsWith('?')).toBe(false);
+      expect(c.confidence).toBe(0.95);
+    }
+  });
+});
+
 describe('rule generation: abstract -ость nouns (outrank the -ти infinitive guess)', () => {
   it('positive: смелости (unknown) — genitive/dative/prepositional singular of an abstract -ость noun, not a verb', () => {
     const cands = analyze('смелости');

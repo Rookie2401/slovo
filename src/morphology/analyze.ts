@@ -16,7 +16,7 @@ import { ruleGuesses } from './guess';
 export type { AnalysisContext };
 
 /** Bump when a rule in guess.ts, a closed-class table, or the dictionary bridge changes behaviour. */
-export const ENGINE_RULES_VERSION = 5;
+export const ENGINE_RULES_VERSION = 6;
 
 function namesRegisterNote(kind: string): string {
   switch (kind) {

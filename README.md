@@ -48,6 +48,29 @@ Home → *Import a book* accepts **EPUB**, **HTML/XHTML**, **TXT** and a **JSON 
 **DRM is never bypassed.** An `.acsm` file, an Adobe `rights.xml`, or an `encryption.xml` that
 covers anything other than obfuscated fonts is refused with an explanation.
 
+## Library and coverage (exact, 2026-09-22)
+
+33 works, 2,334,820 word tokens (Tolstoy's four graded readers → *Кавказский пленник* →
+*Смерть Ивана Ильича*, *Хаджи-Мурат* → *Белые ночи*, *Кроткая* → *Записки из подполья*,
+*Преступление и наказание* → *Идиот*, *Бесы*, *Братья Карамазовы*, *Анна Каренина*, *Война и
+мир*, *Воскресение*, *Подросток*); 13 works carry a chapter-aligned public-domain English
+parallel (Garnett, Maude, Hogarth, Martin).
+
+Read as sentences — which is what the reader shows — the deterministic engine (rules v6)
+resolves **98.24 %** of those tokens without a guess; the remaining 1.76 % are shown as guesses
+and say so (mostly editorial abbreviations, a few gerunds and dialect words). Word by word,
+without sentence context: 94.97 % (53.83 % dictionary form hits, 40.78 % closed-class tables,
+0.35 % rule generation; 5.03 % guesses). Per work the sentence-level figure runs from about
+96.4 % (*Хозяин и работник*) to 98.8 % (*Сон смешного человека*). The dictionary form index
+alone (no closed-class tables) covers 85.97 % — the difference is pronouns, prepositions,
+conjunctions and particles, which the dump does not inflect. All figures come from
+`npx vite-node scripts/engine-coverage.mts` and `scripts/sentence-coverage.mts` and are
+stored in `src/data/engine-coverage.json`; Settings quotes them.
+
+Probes for checking the engine on real text: `npx vite-node scripts/probe-engine.mts
+dostoevsky-prestuplenie-i-nakazanie 0 0` (a paragraph, every pick) and
+`npx vite-node scripts/probe-word.mts спустился` (every candidate for one form).
+
 ## Sources & licences
 
 * Dictionary: **OpenRussian**, CC BY-SA 4.0.

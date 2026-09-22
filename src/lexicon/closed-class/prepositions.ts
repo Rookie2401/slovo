@@ -46,6 +46,7 @@ export const PREPOSITIONS: PrepositionEntry[] = [
   { form: 'обо', senses: [{ case: 'prep', sense: 'about, concerning (variant of о before мне/всём)' }] },
   { form: 'про', senses: [{ case: 'acc', sense: 'about (colloquial: про тебя)' }] },
   { form: 'через', senses: [{ case: 'acc', sense: 'across, through, or "after (a time)" (через дорогу; через час)' }] },
+  { form: 'чрез', senses: [{ case: 'acc', sense: 'across, through, or "after (a time)" — older spelling of через' }] },
   { form: 'при', senses: [{ case: 'prep', sense: 'in the presence of, attached to, at the time of (при мне; при школе)' }] },
   { form: 'над', senses: [{ case: 'inst', sense: 'location: above (над столом)' }] },
   { form: 'перед', senses: [{ case: 'inst', sense: 'location: in front of, before (перед домом)' }] },

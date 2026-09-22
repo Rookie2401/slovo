@@ -38,19 +38,37 @@ export function isVowel(ch: string): boolean {
   return VOWELS.has(ch.toLowerCase());
 }
 
-/** NFC, stress marks stripped, apostrophes unified; case preserved. */
-export function normalize(s: string): string {
-  return s.normalize('NFC').replace(/[̀́]/g, '').replace(/[’ʼ`´]/g, "'");
+/**
+ * Printed editions (lib.ru, Tolstoy's чтò / бòльшая) mark a disambiguating
+ * stress with a precomposed LATIN accented vowel inside a Cyrillic word. Map
+ * those to the Cyrillic letter + a combining mark so the word stays one token
+ * and the mark counts as a source stress.
+ */
+const LATIN_ACCENTED: Record<string, string> = {
+  'ò': 'о̀', 'ó': 'о́', 'à': 'а̀', 'á': 'а́', 'è': 'ѐ', 'é': 'е́',
+  'ù': 'у̀', 'ú': 'у́', 'ì': 'ѝ', 'í': 'и́', 'ý': 'ы́',
+};
+const LATIN_ACCENTED_RE = /[òóàáèéùúìíý]/g;
+const isLatinAccented = (ch: string) => Object.prototype.hasOwnProperty.call(LATIN_ACCENTED, ch);
+
+/** Decompose so that precomposed ѐ/ѝ (NFC of е/и + grave) expose their marks too. */
+function decomposed(s: string): string {
+  return s.replace(LATIN_ACCENTED_RE, (c) => LATIN_ACCENTED[c]!).normalize('NFD');
 }
 
-/** Index of the stressed vowel in normalize(s) when s carries a combining acute, else -1. */
+/** NFC, stress marks (acute and grave, incl. precomposed ѐ/ѝ and Latin ò-style marks) stripped, apostrophes unified; case preserved. */
+export function normalize(s: string): string {
+  return decomposed(s).replace(/[̀́]/g, '').normalize('NFC').replace(/[’ʼ`´]/g, "'");
+}
+
+/** Index of the stressed vowel in normalize(s) when s carries a stress mark (acute, or the grave that printed editions use to disambiguate чтò), else -1. */
 export function sourceStressIndex(s: string): number {
-  const nfc = s.normalize('NFC');
+  const nfd = decomposed(s);
   let out = 0;
-  for (let i = 0; i < nfc.length; i++) {
-    const ch = nfc[i]!;
-    if (ch === COMBINING_ACUTE) return out - 1;
-    if (ch === COMBINING_GRAVE) continue;
+  for (let i = 0; i < nfd.length; i++) {
+    const ch = nfd[i]!;
+    if (ch === COMBINING_ACUTE || ch === COMBINING_GRAVE) return out - 1;
+    if (/[̀-ͯ]/.test(ch)) continue;
     out++;
   }
   return -1;
@@ -100,11 +118,13 @@ export function tokenize(text: string): RawToken[] {
     if (/\s/.test(ch)) { i++; continue; }
     if (isWordChar(ch)) {
       let j = i;
-      while (j < n && isWordChar(text[j]!)) j++;
+      // a Latin accented vowel (чтò) continues a Cyrillic run; it never starts one
+      const runChar = (k: number) => isWordChar(text[k]!) || (k > i && isLatinAccented(text[k]!));
+      while (j < n && runChar(j)) j++;
       // hyphen joins two letter runs (кто-то, из-за, по-моему)
       while (j < n - 1 && isHyphen(text[j]!) && isWordChar(text[j + 1]!)) {
         j++;
-        while (j < n && isWordChar(text[j]!)) j++;
+        while (j < n && runChar(j)) j++;
       }
       const t = text.slice(i, j);
       const tok: RawToken = { kind: 'word', start: i, end: j, text: t };

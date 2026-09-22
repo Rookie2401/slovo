@@ -1,268 +1,454 @@
 {
-  "generated_at": "2026-09-22T21:16:07.338Z",
-  "rules_version": 4,
-  "tokens": 2409692,
-  "resolved": 2246408,
-  "resolved_share": 0.9322386429468994,
+  "generated_at": "2026-09-22T21:50:02.598Z",
+  "rules_version": 6,
+  "tokens": 2335652,
+  "resolved": 2218129,
+  "resolved_share": 0.9496830007209979,
   "shares": {
-    "dictionary": 0.5411214379265068,
-    "closed": 0.38745906115802353,
-    "rule": 0.0036581438623691327,
-    "guess": 0.06776135705310056,
+    "dictionary": 0.538318636509206,
+    "closed": 0.40782145627858946,
+    "rule": 0.003542907933202378,
+    "guess": 0.05031699927900218,
     "none": 0
   },
   "by_work": {
     "tolstoy-first-reader": {
       "tokens": 9441,
-      "resolved": 9126,
-      "resolved_share": 0.9666348903717826,
-      "guess": 315,
+      "resolved": 9146,
+      "resolved_share": 0.9687533100307171,
+      "guess": 295,
       "none": 0
     },
     "tolstoy-second-reader": {
       "tokens": 15000,
-      "resolved": 14357,
-      "resolved_share": 0.9571333333333333,
-      "guess": 643,
+      "resolved": 14413,
+      "resolved_share": 0.9608666666666666,
+      "guess": 587,
       "none": 0
     },
     "tolstoy-third-reader": {
-      "tokens": 17786,
-      "resolved": 17043,
-      "resolved_share": 0.9582255706735635,
-      "guess": 743,
+      "tokens": 17784,
+      "resolved": 17094,
+      "resolved_share": 0.9612010796221323,
+      "guess": 690,
       "none": 0
     },
     "tolstoy-fourth-reader": {
       "tokens": 19264,
-      "resolved": 18618,
-      "resolved_share": 0.9664659468438538,
-      "guess": 646,
+      "resolved": 18662,
+      "resolved_share": 0.96875,
+      "guess": 602,
       "none": 0
     },
     "tolstoy-kavkazsky-plennik": {
       "tokens": 6527,
-      "resolved": 6271,
-      "resolved_share": 0.9607783055002298,
-      "guess": 256,
+      "resolved": 6292,
+      "resolved_share": 0.9639957101271641,
+      "guess": 235,
       "none": 0
     },
     "tolstoy-khozyain-i-rabotnik": {
       "tokens": 14067,
-      "resolved": 12711,
-      "resolved_share": 0.9036041799957347,
-      "guess": 1356,
+      "resolved": 12942,
+      "resolved_share": 0.9200255918106206,
+      "guess": 1125,
       "none": 0
     },
     "tolstoy-alyosha-gorshok": {
       "tokens": 1706,
-      "resolved": 1596,
-      "resolved_share": 0.9355216881594373,
-      "guess": 110,
+      "resolved": 1601,
+      "resolved_share": 0.9384525205158265,
+      "guess": 105,
       "none": 0
     },
     "tolstoy-tri-smerti": {
       "tokens": 3673,
-      "resolved": 3462,
-      "resolved_share": 0.942553770759597,
-      "guess": 211,
+      "resolved": 3516,
+      "resolved_share": 0.9572556493329704,
+      "guess": 157,
       "none": 0
     },
     "tolstoy-kholstomer": {
       "tokens": 11361,
-      "resolved": 10748,
-      "resolved_share": 0.9460434820878444,
-      "guess": 613,
+      "resolved": 10886,
+      "resolved_share": 0.9581903001496347,
+      "guess": 475,
       "none": 0
     },
     "tolstoy-smert-ivana-ilyicha": {
       "tokens": 17358,
-      "resolved": 16174,
-      "resolved_share": 0.9317893766562968,
-      "guess": 1184,
+      "resolved": 16329,
+      "resolved_share": 0.9407189768406499,
+      "guess": 1029,
       "none": 0
     },
     "tolstoy-khadzhi-murat": {
       "tokens": 34688,
-      "resolved": 31396,
-      "resolved_share": 0.9050968634686347,
-      "guess": 3292,
+      "resolved": 31912,
+      "resolved_share": 0.9199723247232472,
+      "guess": 2776,
       "none": 0
     },
     "tolstoy-otets-sergiy": {
       "tokens": 13432,
-      "resolved": 12750,
-      "resolved_share": 0.949225729600953,
-      "guess": 682,
+      "resolved": 12892,
+      "resolved_share": 0.9597974985110185,
+      "guess": 540,
       "none": 0
     },
     "tolstoy-kreytserova-sonata": {
       "tokens": 25225,
-      "resolved": 24616,
-      "resolved_share": 0.9758572844400396,
-      "guess": 609,
+      "resolved": 24809,
+      "resolved_share": 0.9835084241823587,
+      "guess": 416,
       "none": 0
     },
     "tolstoy-detstvo": {
       "tokens": 29779,
-      "resolved": 28277,
-      "resolved_share": 0.949561771718325,
-      "guess": 1502,
+      "resolved": 28597,
+      "resolved_share": 0.9603075993149535,
+      "guess": 1182,
       "none": 0
     },
     "dostoevsky-malchik-u-khrista": {
       "tokens": 1821,
-      "resolved": 1774,
-      "resolved_share": 0.9741900054914882,
-      "guess": 47,
+      "resolved": 1783,
+      "resolved_share": 0.9791323448654585,
+      "guess": 38,
       "none": 0
     },
     "dostoevsky-belye-nochi": {
       "tokens": 16837,
-      "resolved": 16337,
-      "resolved_share": 0.9703034982479064,
-      "guess": 500,
+      "resolved": 16427,
+      "resolved_share": 0.9756488685632833,
+      "guess": 410,
       "none": 0
     },
     "dostoevsky-krotkaya": {
       "tokens": 13453,
-      "resolved": 13165,
-      "resolved_share": 0.9785921355831413,
-      "guess": 288,
+      "resolved": 13223,
+      "resolved_share": 0.9829034416115364,
+      "guess": 230,
       "none": 0
     },
     "dostoevsky-son-smeshnogo-cheloveka": {
       "tokens": 7245,
-      "resolved": 7118,
-      "resolved_share": 0.9824706694271912,
-      "guess": 127,
+      "resolved": 7163,
+      "resolved_share": 0.9886818495514148,
+      "guess": 82,
       "none": 0
     },
     "dostoevsky-chestny-vor": {
       "tokens": 4903,
-      "resolved": 4550,
-      "resolved_share": 0.9280032633081786,
-      "guess": 353,
+      "resolved": 4564,
+      "resolved_share": 0.9308586579645115,
+      "guess": 339,
       "none": 0
     },
     "dostoevsky-yolka-i-svadba": {
       "tokens": 2291,
-      "resolved": 2149,
-      "resolved_share": 0.938018332605849,
-      "guess": 142,
+      "resolved": 2166,
+      "resolved_share": 0.945438673068529,
+      "guess": 125,
       "none": 0
     },
     "dostoevsky-bobok": {
       "tokens": 4472,
-      "resolved": 4228,
-      "resolved_share": 0.945438282647585,
-      "guess": 244,
+      "resolved": 4254,
+      "resolved_share": 0.9512522361359571,
+      "guess": 218,
       "none": 0
     },
     "dostoevsky-zapiski-iz-podpolya": {
       "tokens": 34866,
-      "resolved": 33674,
-      "resolved_share": 0.9658119658119658,
-      "guess": 1192,
+      "resolved": 33904,
+      "resolved_share": 0.9724086502609992,
+      "guess": 962,
       "none": 0
     },
     "dostoevsky-bednye-lyudi": {
       "tokens": 41280,
-      "resolved": 39551,
-      "resolved_share": 0.9581153100775194,
-      "guess": 1729,
+      "resolved": 39705,
+      "resolved_share": 0.9618459302325582,
+      "guess": 1575,
       "none": 0
     },
     "dostoevsky-igrok": {
       "tokens": 43923,
-      "resolved": 42055,
-      "resolved_share": 0.9574710288459349,
-      "guess": 1868,
+      "resolved": 42431,
+      "resolved_share": 0.9660314641531772,
+      "guess": 1492,
       "none": 0
     },
     "dostoevsky-dvoynik": {
       "tokens": 46104,
-      "resolved": 42739,
-      "resolved_share": 0.9270128405344439,
-      "guess": 3365,
+      "resolved": 43223,
+      "resolved_share": 0.937510845045983,
+      "guess": 2881,
       "none": 0
     },
     "dostoevsky-prestuplenie-i-nakazanie": {
       "tokens": 169872,
-      "resolved": 160614,
-      "resolved_share": 0.9455001412828483,
-      "guess": 9258,
+      "resolved": 162176,
+      "resolved_share": 0.9546952999905811,
+      "guess": 7696,
       "none": 0
     },
     "dostoevsky-idiot": {
       "tokens": 206571,
-      "resolved": 194375,
-      "resolved_share": 0.9409597668598206,
-      "guess": 12196,
+      "resolved": 196516,
+      "resolved_share": 0.9513242420281647,
+      "guess": 10055,
       "none": 0
     },
     "dostoevsky-besy": {
       "tokens": 207091,
-      "resolved": 193479,
-      "resolved_share": 0.9342704414967333,
-      "guess": 13612,
+      "resolved": 195372,
+      "resolved_share": 0.9434113505656934,
+      "guess": 11719,
       "none": 0
     },
     "dostoevsky-podrostok": {
       "tokens": 187310,
-      "resolved": 178790,
-      "resolved_share": 0.9545139074261919,
-      "guess": 8520,
+      "resolved": 180264,
+      "resolved_share": 0.9623832149911911,
+      "guess": 7046,
       "none": 0
     },
     "dostoevsky-bratya-karamazovy": {
       "tokens": 291796,
-      "resolved": 273931,
-      "resolved_share": 0.9387757200235781,
-      "guess": 17865,
+      "resolved": 276765,
+      "resolved_share": 0.9484879847564737,
+      "guess": 15031,
       "none": 0
     },
     "tolstoy-anna-karenina": {
       "tokens": 268500,
-      "resolved": 248841,
-      "resolved_share": 0.9267821229050279,
-      "guess": 19659,
+      "resolved": 252849,
+      "resolved_share": 0.9417094972067039,
+      "guess": 15651,
       "none": 0
     },
     "tolstoy-voskresenie": {
       "tokens": 135978,
-      "resolved": 127283,
-      "resolved_share": 0.9360558325611495,
-      "guess": 8695,
+      "resolved": 129193,
+      "resolved_share": 0.9501022224183324,
+      "guess": 6785,
       "none": 0
     },
     "tolstoy-voyna-i-mir": {
-      "tokens": 506072,
-      "resolved": 454610,
-      "resolved_share": 0.8983109122812564,
-      "guess": 51462,
+      "tokens": 432034,
+      "resolved": 407060,
+      "resolved_share": 0.9421943643324368,
+      "guess": 24974,
       "none": 0
     }
   },
   "sentence_level": {
-    "generated_at": "2026-09-22T21:26:00.728Z",
-    "rules_version": 5,
-    "tokens": 26278,
-    "resolved": 25895,
-    "resolved_share": 0.985425070401096,
-    "guess_share": 0.014574929598904026,
+    "generated_at": "2026-09-22T21:58:01.712Z",
+    "rules_version": 6,
+    "tokens": 2334820,
+    "resolved": 2293715,
+    "resolved_share": 0.9823947884633505,
+    "guess_share": 0.017605211536649505,
     "by_work": {
       "tolstoy-first-reader": {
         "tokens": 9441,
-        "resolved": 9293,
-        "resolved_share": 0.9843236945238851,
-        "guess": 148
+        "resolved": 9298,
+        "resolved_share": 0.9848532994386188,
+        "guess": 143
+      },
+      "tolstoy-second-reader": {
+        "tokens": 15000,
+        "resolved": 14730,
+        "resolved_share": 0.982,
+        "guess": 270
+      },
+      "tolstoy-third-reader": {
+        "tokens": 17784,
+        "resolved": 17536,
+        "resolved_share": 0.9860548807917229,
+        "guess": 248
+      },
+      "tolstoy-fourth-reader": {
+        "tokens": 19264,
+        "resolved": 18854,
+        "resolved_share": 0.9787167774086378,
+        "guess": 410
+      },
+      "tolstoy-kavkazsky-plennik": {
+        "tokens": 6527,
+        "resolved": 6391,
+        "resolved_share": 0.9791634747969971,
+        "guess": 136
+      },
+      "tolstoy-khozyain-i-rabotnik": {
+        "tokens": 14067,
+        "resolved": 13617,
+        "resolved_share": 0.9680102367242482,
+        "guess": 450
+      },
+      "tolstoy-alyosha-gorshok": {
+        "tokens": 1706,
+        "resolved": 1678,
+        "resolved_share": 0.9835873388042204,
+        "guess": 28
+      },
+      "tolstoy-tri-smerti": {
+        "tokens": 3673,
+        "resolved": 3577,
+        "resolved_share": 0.9738633269806698,
+        "guess": 96
+      },
+      "tolstoy-kholstomer": {
+        "tokens": 11361,
+        "resolved": 11045,
+        "resolved_share": 0.9721855470469148,
+        "guess": 316
+      },
+      "tolstoy-smert-ivana-ilyicha": {
+        "tokens": 17358,
+        "resolved": 17147,
+        "resolved_share": 0.9878442216845259,
+        "guess": 211
+      },
+      "tolstoy-khadzhi-murat": {
+        "tokens": 34688,
+        "resolved": 33845,
+        "resolved_share": 0.975697647601476,
+        "guess": 843
+      },
+      "tolstoy-otets-sergiy": {
+        "tokens": 13432,
+        "resolved": 13222,
+        "resolved_share": 0.9843656938653961,
+        "guess": 210
+      },
+      "tolstoy-kreytserova-sonata": {
+        "tokens": 25225,
+        "resolved": 24904,
+        "resolved_share": 0.9872745292368682,
+        "guess": 321
+      },
+      "tolstoy-detstvo": {
+        "tokens": 29779,
+        "resolved": 29283,
+        "resolved_share": 0.9833439672252259,
+        "guess": 496
+      },
+      "dostoevsky-malchik-u-khrista": {
+        "tokens": 1821,
+        "resolved": 1787,
+        "resolved_share": 0.9813289401427787,
+        "guess": 34
       },
       "dostoevsky-belye-nochi": {
         "tokens": 16837,
-        "resolved": 16602,
-        "resolved_share": 0.986042644176516,
-        "guess": 235
+        "resolved": 16639,
+        "resolved_share": 0.988240185306171,
+        "guess": 198
+      },
+      "dostoevsky-krotkaya": {
+        "tokens": 13453,
+        "resolved": 13309,
+        "resolved_share": 0.9892960677915706,
+        "guess": 144
+      },
+      "dostoevsky-son-smeshnogo-cheloveka": {
+        "tokens": 7245,
+        "resolved": 7169,
+        "resolved_share": 0.9895100069013113,
+        "guess": 76
+      },
+      "dostoevsky-chestny-vor": {
+        "tokens": 4903,
+        "resolved": 4789,
+        "resolved_share": 0.9767489292270038,
+        "guess": 114
+      },
+      "dostoevsky-yolka-i-svadba": {
+        "tokens": 2284,
+        "resolved": 2226,
+        "resolved_share": 0.9746059544658494,
+        "guess": 58
+      },
+      "dostoevsky-bobok": {
+        "tokens": 4468,
+        "resolved": 4374,
+        "resolved_share": 0.9789615040286481,
+        "guess": 94
+      },
+      "dostoevsky-zapiski-iz-podpolya": {
+        "tokens": 34866,
+        "resolved": 34189,
+        "resolved_share": 0.9805828027304537,
+        "guess": 677
+      },
+      "dostoevsky-bednye-lyudi": {
+        "tokens": 41280,
+        "resolved": 40616,
+        "resolved_share": 0.9839147286821706,
+        "guess": 664
+      },
+      "dostoevsky-igrok": {
+        "tokens": 43360,
+        "resolved": 42574,
+        "resolved_share": 0.9818726937269373,
+        "guess": 786
+      },
+      "dostoevsky-dvoynik": {
+        "tokens": 46104,
+        "resolved": 45153,
+        "resolved_share": 0.9793727225403436,
+        "guess": 951
+      },
+      "dostoevsky-prestuplenie-i-nakazanie": {
+        "tokens": 169801,
+        "resolved": 166823,
+        "resolved_share": 0.982461822957462,
+        "guess": 2978
+      },
+      "dostoevsky-idiot": {
+        "tokens": 206421,
+        "resolved": 203630,
+        "resolved_share": 0.9864790888523939,
+        "guess": 2791
+      },
+      "dostoevsky-besy": {
+        "tokens": 207091,
+        "resolved": 203755,
+        "resolved_share": 0.9838911396439246,
+        "guess": 3336
+      },
+      "dostoevsky-podrostok": {
+        "tokens": 187310,
+        "resolved": 184871,
+        "resolved_share": 0.9869788051892584,
+        "guess": 2439
+      },
+      "dostoevsky-bratya-karamazovy": {
+        "tokens": 291796,
+        "resolved": 286480,
+        "resolved_share": 0.981781792759325,
+        "guess": 5316
+      },
+      "tolstoy-anna-karenina": {
+        "tokens": 268500,
+        "resolved": 264300,
+        "resolved_share": 0.9843575418994414,
+        "guess": 4200
+      },
+      "tolstoy-voskresenie": {
+        "tokens": 135941,
+        "resolved": 133252,
+        "resolved_share": 0.980219359869355,
+        "guess": 2689
+      },
+      "tolstoy-voyna-i-mir": {
+        "tokens": 432034,
+        "resolved": 422652,
+        "resolved_share": 0.9782841165278658,
+        "guess": 9382
       }
     }
   }

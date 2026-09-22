@@ -6,6 +6,14 @@ import { ENGINE_RULES_VERSION } from '../morphology/analyze';
 import { audioAvailable, russianVoice } from '../audio/speech';
 import { revokeCorrection } from '../database/analysis';
 import type { UserCorrection } from '../database/types';
+import engineCoverage from '../data/engine-coverage.json';
+
+/** Exact figures from scripts/engine-coverage.mts + scripts/sentence-coverage.mts — never rounded up. */
+const COVERAGE = {
+  sentence: (engineCoverage as { sentence_level?: { resolved_share: number; tokens: number; rules_version: number } }).sentence_level,
+  word: engineCoverage as { resolved_share: number; tokens: number; shares: { dictionary: number; closed: number; rule: number; guess: number } },
+};
+const pct = (x: number) => `${(100 * x).toFixed(2)} %`;
 
 export function SettingsScreen() {
   const [s, set] = useSettings();
@@ -111,6 +119,14 @@ export function SettingsScreen() {
           <button className="btn btn--small btn--danger" onClick={() => { if (confirm('Reset the first-run questionnaire?')) set({ onboarded: false }); }}>Redo first-run setup</button>
         </div>
         {msg && <p className="muted-note">{msg}</p>}
+
+        <h2 className="label" style={{ marginTop: '1.5rem' }}>Coverage</h2>
+        <p className="home__about">
+          {COVERAGE.sentence
+            ? <>Read as sentences, the deterministic engine (rules v{COVERAGE.sentence.rules_version}) resolves {pct(COVERAGE.sentence.resolved_share)} of the library's {COVERAGE.sentence.tokens.toLocaleString('en-US')} word tokens without a guess; the rest are shown as guesses and say so. </>
+            : null}
+          Word by word, without sentence context: {pct(COVERAGE.word.resolved_share)} resolved ({pct(COVERAGE.word.shares.dictionary)} dictionary, {pct(COVERAGE.word.shares.closed)} closed-class tables, {pct(COVERAGE.word.shares.rule)} rule generation), {pct(COVERAGE.word.shares.guess)} guesses. Figures come from <code>scripts/engine-coverage.mts</code> and <code>scripts/sentence-coverage.mts</code>.
+        </p>
 
         <h2 className="label" style={{ marginTop: '1.5rem' }}>Sources &amp; licences</h2>
         <p className="home__about">

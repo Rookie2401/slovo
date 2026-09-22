@@ -138,6 +138,22 @@ for (const [form, g, c] of cheyForms) {
   add(form, { key: 'pronoun:чей', lemma: 'чей', pos: 'pronoun', gloss: 'whose', features });
 }
 
+// сей/сия/сие ("this" — archaic/bookish, still common in 19th-century prose): irregular like
+// этот, hand-tabled the same way.
+const seyForms: Array<[string, Gender | 'pl', Case]> = [
+  ['сей', 'm', 'nom'], ['сего', 'm', 'gen'], ['сему', 'm', 'dat'], ['сим', 'm', 'inst'], ['сём', 'm', 'prep'],
+  ['сия', 'f', 'nom'], ['сей', 'f', 'gen'], ['сей', 'f', 'dat'], ['сию', 'f', 'acc'], ['сей', 'f', 'inst'], ['сей', 'f', 'prep'],
+  ['сие', 'n', 'nom'], ['сего', 'n', 'gen'], ['сему', 'n', 'dat'], ['сие', 'n', 'acc'], ['сим', 'n', 'inst'], ['сём', 'n', 'prep'],
+  ['сии', 'pl', 'nom'], ['сих', 'pl', 'gen'], ['сим', 'pl', 'dat'], ['сии', 'pl', 'acc'], ['сими', 'pl', 'inst'], ['сих', 'pl', 'prep'],
+];
+for (const [form, g, c] of seyForms) {
+  const features: MorphFeatures = { case: c, gender: g === 'pl' ? undefined : g, number: g === 'pl' ? 'pl' : 'sg', pronoun_type: 'demonstrative' };
+  add(form, { key: 'pronoun:сей', lemma: 'сей', pos: 'pronoun', gloss: 'this (archaic/bookish)', features });
+}
+
+// оный ("that, the aforesaid" — archaic/legal): regular hard-adjective declension.
+demonstrative('оный', 'that, the aforesaid (archaic/legal)', hardAdjective('он'));
+
 // ---- interrogative / relative -----------------------------------------------
 const KTO: Array<[string, Case]> = [['кто', 'nom'], ['кого', 'gen'], ['кому', 'dat'], ['кого', 'acc'], ['кем', 'inst'], ['ком', 'prep']];
 for (const [form, c] of KTO) add(form, { key: 'pronoun:кто', lemma: 'кто', pos: 'pronoun', gloss: 'who', features: { case: c, number: 'sg', person: 3, pronoun_type: 'interrogative/relative' } });

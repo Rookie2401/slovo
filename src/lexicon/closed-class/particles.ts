@@ -5,17 +5,17 @@
  * construction from it).
  */
 import type { Candidate } from '../../morphology/candidate';
-import type { Morpheme } from '../../database/types';
+import type { Morpheme, Pos } from '../../database/types';
 import { looseKey } from '../../tokenizer/cyrillic';
 
 const INDEX = new Map<string, Candidate[]>();
 function whole(form: string): Morpheme[] {
   return [{ text: form, role: 'stem', gloss: 'whole word (closed class)', start: 0, end: form.length }];
 }
-function add(form: string, lemma: string, gloss: string, notes: string[] = []) {
+function add(form: string, lemma: string, gloss: string, notes: string[] = [], pos: Pos = 'particle') {
   const key = looseKey(form);
   const list = INDEX.get(key) ?? [];
-  list.push({ key: `particle:${lemma}`, lemma, pos: 'particle', gloss, features: {}, morphemes: whole(form), notes, source: 'rule', confidence: 1 });
+  list.push({ key: `${pos}:${lemma}`, lemma, pos, gloss, features: {}, morphemes: whole(form), notes, source: 'rule', confidence: 1 });
   INDEX.set(key, list);
 }
 
@@ -37,6 +37,17 @@ add('неужели', 'неужели', 'is it really true that…?', ['a questi
 add('таки', 'таки', 'after all / all the same', ['emphatic, usually attached with a hyphen: всё-таки']);
 add('то', 'то', 'then / topic marker', ['after если/раз: introduces the consequence clause; also fuses onto pronouns as -то (кто-то)']);
 add('нибудь', 'нибудь', 'any- (indefinite)', ['suffix particle: fuses onto pronouns/adverbs as -нибудь (кто-нибудь)']);
+
+// archaic/dialect aliases and standalone archaic adverbs (19th-century and folk-tale texts)
+add('чорт', 'чёрт', 'devil', ['old (pre-reform-ish) spelling of чёрт'], 'noun');
+add('поскорей', 'поскорее', 'quicker, hurry up', ['dialect/colloquial variant of the comparative поскорее'], 'adverb');
+add('поскорее', 'поскорее', 'quicker, hurry up', ['по- + the comparative скорее: "a bit quicker, hurry up"'], 'adverb');
+add('нынче', 'нынче', 'nowadays / today', ['archaic/dialect adverb of time'], 'adverb');
+add('покамест', 'покамест', 'for the time being / while', ['archaic/dialect adverb-conjunction of time'], 'adverb');
+add('давеча', 'давеча', 'a while ago, earlier today', ['archaic/dialect adverb of time'], 'adverb');
+add('вечор', 'вечор', 'yesterday evening', ['archaic/dialect adverb of time (distinct from вечером)'], 'adverb');
+add('отселе', 'отселе', 'from here', ['archaic adverb of place'], 'adverb');
+add('проч', 'прочее', 'et cetera, and so on', ['abbreviation "проч." — и прочее, "and the rest"'], 'adverb');
 
 export function particleCandidates(key: string): Candidate[] {
   return INDEX.get(key) ?? [];

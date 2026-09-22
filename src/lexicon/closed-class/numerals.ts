@@ -43,9 +43,27 @@ add('двух', { key: 'numeral:два', lemma: 'два', pos: 'numeral', gloss:
 add('трёх', { key: 'numeral:три', lemma: 'три', pos: 'numeral', gloss: 'three', features: { case: 'gen' } });
 add('трех', { key: 'numeral:три', lemma: 'три', pos: 'numeral', gloss: 'three', features: { case: 'gen' } });
 add('трём', { key: 'numeral:три', lemma: 'три', pos: 'numeral', gloss: 'three', features: { case: 'dat' } });
+add('тремя', { key: 'numeral:три', lemma: 'три', pos: 'numeral', gloss: 'three', features: { case: 'inst' } });
+add('трёх', { key: 'numeral:три', lemma: 'три', pos: 'numeral', gloss: 'three', features: { case: 'prep' } });
 add('три', { key: 'numeral:три', lemma: 'три', pos: 'numeral', gloss: 'three', features: { case: 'nom' }, notes: ['governs the genitive singular of the counted noun (три дня)'] });
 add('четыре', { key: 'numeral:четыре', lemma: 'четыре', pos: 'numeral', gloss: 'four', features: { case: 'nom' }, notes: ['governs the genitive singular of the counted noun (четыре часа́)'] });
 add('четырёх', { key: 'numeral:четыре', lemma: 'четыре', pos: 'numeral', gloss: 'four', features: { case: 'gen' } });
+add('четырём', { key: 'numeral:четыре', lemma: 'четыре', pos: 'numeral', gloss: 'four', features: { case: 'dat' } });
+add('четырьмя', { key: 'numeral:четыре', lemma: 'четыре', pos: 'numeral', gloss: 'four', features: { case: 'inst' } });
+add('четырёх', { key: 'numeral:четыре', lemma: 'четыре', pos: 'numeral', gloss: 'four', features: { case: 'prep' } });
+
+// ---- оба/обе ("both"): full declension, gendered like два/две
+const obaForms: Array<[string, Gender, Case]> = [
+  ['оба', 'm', 'nom'], ['обоих', 'm', 'gen'], ['обоим', 'm', 'dat'], ['обоими', 'm', 'inst'], ['обоих', 'm', 'prep'],
+  ['обе', 'f', 'nom'], ['обеих', 'f', 'gen'], ['обеим', 'f', 'dat'], ['обеими', 'f', 'inst'], ['обеих', 'f', 'prep'],
+];
+for (const [form, gender, c] of obaForms) {
+  add(form, {
+    key: `numeral:${gender === 'f' ? 'обе' : 'оба'}`, lemma: gender === 'f' ? 'обе' : 'оба', pos: 'numeral', gloss: 'both', features: { case: c, gender },
+    notes: ['agrees in gender with the counted noun (оба брата, обе сестры); governs the genitive singular like два/две'],
+  });
+}
+add('обоих', { key: 'numeral:оба', lemma: 'оба', pos: 'numeral', gloss: 'both', features: { case: 'acc', gender: 'm' }, notes: ['animate accusative'] });
 
 // ---- пять–десять, and the -дцать/-десят family: indeclinable-ish nom/acc form
 // used undeclined here; govern gen pl of the counted noun.
@@ -58,6 +76,28 @@ const FIVE_TO_TWENTY: Array<[string, string]> = [
 ];
 for (const [form, gloss] of FIVE_TO_TWENTY) {
   add(form, { key: `numeral:${form}`, lemma: form, pos: 'numeral', gloss, features: { case: 'nom' }, notes: ['governs the genitive plural of the counted noun (пять книг)'] });
+}
+// oblique forms of the soft-sign class (пять…тридцать): gen/dat/prep = -и, inst = -ью
+for (const [form] of FIVE_TO_TWENTY) {
+  if (!form.endsWith('ь')) continue; // сорок/сто/девяносто/тысяча are not this class
+  const stem = form.slice(0, -1);
+  for (const c of ['gen', 'dat', 'prep'] as const) add(`${stem}и`, { key: `numeral:${form}`, lemma: form, pos: 'numeral', gloss: `${form} (oblique)`, features: { case: c } });
+  add(`${stem}ью`, { key: `numeral:${form}`, lemma: form, pos: 'numeral', gloss: `${form} (oblique)`, features: { case: 'inst' } });
+}
+// сорок/девяносто/сто: one irregular oblique form covers gen/dat/inst/prep
+const IRREGULAR_OBLIQUE: Array<[string, string]> = [['сорок', 'сорока'], ['девяносто', 'девяноста'], ['сто', 'ста']];
+for (const [nom, obl] of IRREGULAR_OBLIQUE) for (const c of ['gen', 'dat', 'inst', 'prep'] as const) add(obl, { key: `numeral:${nom}`, lemma: nom, pos: 'numeral', gloss: `${nom} (oblique)`, features: { case: c } });
+
+// ---- hundreds: двести…девятьсот (compound, both halves decline — only nominative and the
+// genitive, the most frequent oblique, are given here)
+const HUNDREDS: Array<[string, string, string]> = [
+  ['двести', 'двухсот', 'two hundred'], ['триста', 'трёхсот', 'three hundred'], ['четыреста', 'четырёхсот', 'four hundred'],
+  ['пятьсот', 'пятисот', 'five hundred'], ['шестьсот', 'шестисот', 'six hundred'], ['семьсот', 'семисот', 'seven hundred'],
+  ['восемьсот', 'восьмисот', 'eight hundred'], ['девятьсот', 'девятисот', 'nine hundred'],
+];
+for (const [nom, gen, gloss] of HUNDREDS) {
+  add(nom, { key: `numeral:${nom}`, lemma: nom, pos: 'numeral', gloss, features: { case: 'nom' }, notes: ['governs the genitive plural of the counted noun'] });
+  add(gen, { key: `numeral:${nom}`, lemma: nom, pos: 'numeral', gloss: `${gloss} (oblique)`, features: { case: 'gen' } });
 }
 
 // ---- ordinals: declined like a hard adjective, stem = cardinal minus its own ending
@@ -76,9 +116,20 @@ for (const [stem, lemma, gloss] of ORDINALS) {
 }
 
 // ---- collectives: двое, трое, четверо… (used with masculine/common nouns, children, plurale tantum)
-const COLLECTIVE: Array<[string, string, string]> = [['двое', 'два', 'two (collective)'], ['трое', 'три', 'three (collective)'], ['четверо', 'четыре', 'four (collective)'], ['пятеро', 'пять', 'five (collective)']];
-for (const [form, lemma, gloss] of COLLECTIVE) {
+// [nominative form, dictionary lemma to file under, gloss, oblique stem — двое/трое take -оих
+// (twoих, троих), but четверо/пятеро take -ерых (четверЫх, not "четверих")]
+const COLLECTIVE: Array<[string, string, string, string]> = [
+  ['двое', 'два', 'two (collective)', 'дво'], ['трое', 'три', 'three (collective)', 'тро'],
+  ['четверо', 'четыре', 'four (collective)', 'четвер'], ['пятеро', 'пять', 'five (collective)', 'пятер'],
+];
+for (const [form, lemma, gloss, oblStem] of COLLECTIVE) {
   add(form, { key: `numeral:${lemma}`, lemma: form, pos: 'numeral', gloss, features: { case: 'nom' }, notes: ['collective numeral: used with male/mixed groups, children, and plurale-tantum nouns (двое суток)'] });
+  // oblique: -их/-ых (gen/prep), -им/-ым (dat), -ими/-ыми (inst) — like an adjective's plural oblique
+  const y = oblStem === 'дво' || oblStem === 'тро' ? 'и' : 'ы';
+  add(`${oblStem}${y}х`, { key: `numeral:${lemma}`, lemma: form, pos: 'numeral', gloss: `${gloss} (oblique)`, features: { case: 'gen' } });
+  add(`${oblStem}${y}м`, { key: `numeral:${lemma}`, lemma: form, pos: 'numeral', gloss: `${gloss} (oblique)`, features: { case: 'dat' } });
+  add(`${oblStem}${y}ми`, { key: `numeral:${lemma}`, lemma: form, pos: 'numeral', gloss: `${gloss} (oblique)`, features: { case: 'inst' } });
+  add(`${oblStem}${y}х`, { key: `numeral:${lemma}`, lemma: form, pos: 'numeral', gloss: `${gloss} (oblique)`, features: { case: 'prep' } });
 }
 
 export function numeralCandidates(key: string): Candidate[] {

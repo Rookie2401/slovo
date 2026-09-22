@@ -1,0 +1,187 @@
+[
+  {
+    "canonical": "Родион Романович Раскольников",
+    "given": "Родион",
+    "patronymic": "Романович",
+    "surname": "Раскольников",
+    "forms": [
+      { "form": "Раскольников", "kind": "surname" },
+      { "form": "Раскольникова", "kind": "surname" },
+      { "form": "Раскольникову", "kind": "surname" },
+      { "form": "Раскольникове", "kind": "surname" },
+      { "form": "Родион", "kind": "given" },
+      { "form": "Родиона", "kind": "given" },
+      { "form": "Родиону", "kind": "given" },
+      { "form": "Родя", "kind": "diminutive", "note": "intimate, used by his mother and sister" },
+      { "form": "Родю", "kind": "diminutive" },
+      { "form": "Романович", "kind": "patronymic" }
+    ],
+    "role": "protagonist — an impoverished former student who murders the pawnbroker",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Софья Семёновна Мармеладова",
+    "given": "Софья",
+    "patronymic": "Семёновна",
+    "surname": "Мармеладова",
+    "forms": [
+      { "form": "Соня", "kind": "diminutive", "note": "her usual name in the text" },
+      { "form": "Сони", "kind": "diminutive" },
+      { "form": "Соню", "kind": "diminutive" },
+      { "form": "Соней", "kind": "diminutive" },
+      { "form": "Сонечка", "kind": "diminutive", "note": "even more intimate" },
+      { "form": "Сонечки", "kind": "diminutive" },
+      { "form": "Мармеладова", "kind": "surname" },
+      { "form": "Софья", "kind": "given" },
+      { "form": "Семеновна", "kind": "patronymic", "note": "this edition prints ё as е" }
+    ],
+    "role": "Marmeladov's daughter, driven to prostitution; Raskolnikov's moral counterpart",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Авдотья Романовна Раскольникова",
+    "given": "Авдотья",
+    "patronymic": "Романовна",
+    "surname": "Раскольникова",
+    "forms": [
+      { "form": "Дуня", "kind": "diminutive", "note": "her usual name — Raskolnikov's sister" },
+      { "form": "Дуни", "kind": "diminutive" },
+      { "form": "Дуню", "kind": "diminutive" },
+      { "form": "Дуней", "kind": "diminutive" },
+      { "form": "Дунечка", "kind": "diminutive", "note": "very intimate, maternal" },
+      { "form": "Авдотья", "kind": "given" },
+      { "form": "Авдотью", "kind": "given" },
+      { "form": "Романовна", "kind": "patronymic" }
+    ],
+    "role": "Raskolnikov's sister",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Пульхерия Александровна Раскольникова",
+    "given": "Пульхерия",
+    "patronymic": "Александровна",
+    "surname": "Раскольникова",
+    "forms": [
+      { "form": "Пульхерия", "kind": "given" },
+      { "form": "Пульхерии", "kind": "given" },
+      { "form": "Александровна", "kind": "patronymic" }
+    ],
+    "role": "Raskolnikov's mother",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Порфирий Петрович",
+    "given": "Порфирий",
+    "patronymic": "Петрович",
+    "forms": [
+      { "form": "Порфирий", "kind": "given", "note": "the examining magistrate, referred to by given name + patronymic" },
+      { "form": "Порфирия", "kind": "given" },
+      { "form": "Петрович", "kind": "patronymic" }
+    ],
+    "role": "the examining magistrate investigating the murder",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Дмитрий Прокофьевич Разумихин",
+    "given": "Дмитрий",
+    "patronymic": "Прокофьевич",
+    "surname": "Разумихин",
+    "forms": [
+      { "form": "Разумихин", "kind": "surname" },
+      { "form": "Разумихина", "kind": "surname" },
+      { "form": "Разумихину", "kind": "surname" }
+    ],
+    "role": "Raskolnikov's loyal friend, a former fellow student",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Пётр Петрович Лужин",
+    "given": "Пётр",
+    "patronymic": "Петрович",
+    "surname": "Лужин",
+    "forms": [
+      { "form": "Лужин", "kind": "surname" },
+      { "form": "Лужина", "kind": "surname" },
+      { "form": "Лужину", "kind": "surname" }
+    ],
+    "role": "a well-off suitor courting Dunya, later disgraced",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Аркадий Иванович Свидригайлов",
+    "given": "Аркадий",
+    "patronymic": "Иванович",
+    "surname": "Свидригайлов",
+    "forms": [
+      { "form": "Свидригайлов", "kind": "surname" },
+      { "form": "Свидригайлова", "kind": "surname" },
+      { "form": "Свидригайлову", "kind": "surname" },
+      { "form": "Свидригайлове", "kind": "surname" }
+    ],
+    "role": "a dissolute landowner with a dark past, entangled with Dunya",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Катерина Ивановна Мармеладова",
+    "given": "Катерина",
+    "patronymic": "Ивановна",
+    "surname": "Мармеладова",
+    "forms": [
+      { "form": "Катерина", "kind": "given" },
+      { "form": "Катерины", "kind": "given" },
+      { "form": "Катерину", "kind": "given" },
+      { "form": "Ивановна", "kind": "patronymic" }
+    ],
+    "role": "Marmeladov's consumptive second wife, Sonya's stepmother",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Семён Захарович Мармеладов",
+    "given": "Семён",
+    "patronymic": "Захарович",
+    "surname": "Мармеладов",
+    "forms": [
+      { "form": "Мармеладов", "kind": "surname" },
+      { "form": "Мармеладова", "kind": "surname" },
+      { "form": "Мармеладову", "kind": "surname" }
+    ],
+    "role": "a ruined, drunken former civil servant, Sonya's father",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Алёна Ивановна",
+    "given": "Алёна",
+    "patronymic": "Ивановна",
+    "forms": [
+      { "form": "Алена", "kind": "given", "note": "this edition prints ё as е" },
+      { "form": "Алены", "kind": "given" },
+      { "form": "Ивановна", "kind": "patronymic" }
+    ],
+    "role": "the old pawnbroker whom Raskolnikov murders",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Лизавета Ивановна",
+    "given": "Лизавета",
+    "patronymic": "Ивановна",
+    "forms": [
+      { "form": "Лизавета", "kind": "given" },
+      { "form": "Лизаветы", "kind": "given" },
+      { "form": "Лизавету", "kind": "given" }
+    ],
+    "role": "the pawnbroker's meek half-sister, also killed by Raskolnikov",
+    "source": "manual",
+    "confidence": 1
+  }
+]

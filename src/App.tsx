@@ -9,6 +9,7 @@ import { AlphabetHome, StageScreen, LetterScreen, DrillScreen, HandwritingScreen
 import { WordScreen } from './ui/Word';
 import { VocabularyScreen } from './ui/Vocabulary';
 import { ChapterPrepScreen } from './ui/ChapterPrep';
+import { NamesScreen } from './ui/Names';
 import { UpdateToast } from './ui/UpdateToast';
 
 function Gate({ children }: { children: React.ReactNode }) {
@@ -26,9 +27,10 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/welcome" element={<Onboarding />} />
           <Route path="/import" element={<ImportScreen />} />
-          <Route path="/read/:bookId/:chapterId" element={<Reader />} />
-          <Route path="/prep/:bookId/:chapterId" element={<ChapterPrepScreen />} />
+          <Route path="/read/:bookId/:chapterIndex" element={<Reader />} />
+          <Route path="/prep/:bookId/:chapterIndex" element={<ChapterPrepScreen />} />
           <Route path="/word/:key" element={<WordScreen />} />
+          <Route path="/names/:bookId" element={<NamesScreen />} />
           <Route path="/vocabulary" element={<VocabularyScreen />} />
           <Route path="/alphabet" element={<AlphabetHome />} />
           <Route path="/alphabet/stage/:stageId" element={<StageScreen />} />

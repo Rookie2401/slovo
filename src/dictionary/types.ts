@@ -24,6 +24,8 @@ export interface DictManifest {
   form_shards: Record<string, string>;
   /** shard name → file name under public/dict/lex/ */
   lex_shards: Record<string, string>;
+  /** work slug → file name under public/dict/works/ (WorkBundle) — the fast path preloadWork() uses to read a bundled chapter without touching the global shards */
+  work_bundles: Record<string, string>;
   lexeme_count: number;
   form_count: number;
   /** token coverage of the bundled corpus by the form index alone (0..1), per work slug and overall */
@@ -78,14 +80,23 @@ export interface VerbParadigm {
 
 export type Paradigm = NounParadigm | AdjectiveParadigm | VerbParadigm;
 
-/** All strings in a paradigm are ACCENTED (apostrophe after the stressed vowel), as in the source dump. */
-export interface DictLexeme {
+/**
+ * Everything `candidatesFor` needs except the full paradigm: shipped in the
+ * lightweight per-work bundles (public/dict/works/<slug>.json) so reading a
+ * chapter doesn't have to touch (much of) the global, letter-sharded form/lex
+ * index. `stem` is precomputed at build time (longest common prefix of the
+ * paradigm cells, plain/unaccented; '' for a suppletive lexeme or one with no
+ * paradigm at all) so the reader never needs the paradigm just to segment a
+ * surface form into stem + ending.
+ */
+export interface CoreLexeme {
   id: string;
   lemma: string;
   /** lemma with an apostrophe after the stressed vowel; equals lemma when unknown/monosyllabic */
   acc: string;
   pos: Pos;
   gloss: string;
+  /** capped to 6 in the per-work bundles; uncapped on the full DictLexeme from the lex shards */
   senses: string[];
   gender?: Gender;
   animacy?: Animacy;
@@ -96,12 +107,35 @@ export interface DictLexeme {
   reflexive?: boolean;
   /** frequency rank (1 = most frequent) from the 50k list, matched on the lemma */
   rank?: number;
-  paradigm?: Paradigm;
   /** pronoun subclass / motion verb class etc. for closed classes (hand-written tables) */
   extra?: { pronoun_type?: string; motion?: 'uni' | 'multi'; note?: string };
+  /** kept for informational/debugging purposes only — candidatesFor() no longer relies on this, it
+   *  derives stem/ending per surface form instead (see src/dictionary/index.ts); the longest-common-
+   *  prefix-of-every-paradigm-cell it used to hold is wrong whenever the paradigm has consonant
+   *  mutation or a stress-shift spelling change (e.g. verb:спуститься -> "спу", from presfut "спущусь",
+   *  when the real per-form stem is "спусти"). */
+  stem?: string;
+  /** true only on a lighter, paradigm-less entry shipped in a work bundle (see toCoreLexeme in
+   *  scripts/dict-lib.mjs); absent on the full DictLexeme from a lex shard, even when that full
+   *  entry also happens to have no paradigm (e.g. a preposition). lexeme(id) uses this — not
+   *  "does it have a paradigm?", which many genuinely-full entries never do — to decide whether
+   *  a cached entry still needs upgrading to the authoritative one. */
+  core?: true;
+}
+
+/** The full lexeme, as shipped in public/dict/lex/*.json — CoreLexeme plus the paradigm (all strings ACCENTED, apostrophe after the stressed vowel, as in the source dump). */
+export interface DictLexeme extends CoreLexeme {
+  paradigm?: Paradigm;
 }
 
 export type LexShard = Record<string, DictLexeme>;
+
+/** public/dict/works/<slug>.json — everything one bundled work's chapters need to be read offline without touching the global shards. */
+export interface WorkBundle {
+  slug: string;
+  forms: FormShard;
+  lexemes: Record<string, CoreLexeme>;
+}
 
 /** Decode a FeatureCode into MorphFeatures (pure; implemented in src/dictionary/features.ts). */
 export type DecodeFeatureCode = (code: FeatureCode, lexeme?: Pick<DictLexeme, 'pos' | 'aspect' | 'gender' | 'animacy'>) => MorphFeatures;

@@ -1,0 +1,108 @@
+[
+  {
+    "canonical": "Анна Аркадьевна Каренина",
+    "given": "Анна",
+    "patronymic": "Аркадьевна",
+    "surname": "Каренина",
+    "forms": [
+      { "form": "Анна", "kind": "given" },
+      { "form": "Анны", "kind": "given" },
+      { "form": "Анне", "kind": "given" },
+      { "form": "Анну", "kind": "given" },
+      { "form": "Каренина", "kind": "surname" },
+      { "form": "Карениной", "kind": "surname" },
+      { "form": "Анна Аркадьевна", "kind": "full" }
+    ],
+    "role": "the protagonist, a married woman whose affair destroys her place in society",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Алексей Александрович Каренин",
+    "given": "Алексей",
+    "patronymic": "Александрович",
+    "surname": "Каренин",
+    "forms": [
+      { "form": "Каренин", "kind": "surname" },
+      { "form": "Каренина", "kind": "surname" },
+      { "form": "Каренину", "kind": "surname" },
+      { "form": "Алексей Александрович", "kind": "full" }
+    ],
+    "role": "Anna's husband, a rigid, high-ranking official",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Алексей Кириллович Вронский",
+    "given": "Алексей",
+    "patronymic": "Кириллович",
+    "surname": "Вронский",
+    "forms": [
+      { "form": "Вронский", "kind": "surname" },
+      { "form": "Вронского", "kind": "surname" },
+      { "form": "Вронскому", "kind": "surname" },
+      { "form": "Вронским", "kind": "surname" }
+    ],
+    "role": "the officer whose affair with Anna sets the novel in motion",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Константин Дмитрич Лёвин",
+    "given": "Константин",
+    "patronymic": "Дмитрич",
+    "surname": "Лёвин",
+    "forms": [
+      { "form": "Левин", "kind": "surname", "note": "this edition prints ё as е" },
+      { "form": "Левина", "kind": "surname" },
+      { "form": "Левину", "kind": "surname" },
+      { "form": "Костя", "kind": "diminutive" },
+      { "form": "Константин", "kind": "given" }
+    ],
+    "role": "a landowner seeking a meaningful life — Tolstoy's autobiographical counterpart to Anna's plot",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Екатерина Александровна Щербацкая",
+    "given": "Екатерина",
+    "patronymic": "Александровна",
+    "surname": "Щербацкая",
+    "forms": [
+      { "form": "Кити", "kind": "diminutive", "note": "her usual name" },
+      { "form": "Щербацкая", "kind": "surname" },
+      { "form": "Щербацкой", "kind": "surname" }
+    ],
+    "role": "a young princess who marries Levin after refusing him once",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Степан Аркадьич Облонский",
+    "given": "Степан",
+    "patronymic": "Аркадьич",
+    "surname": "Облонский",
+    "forms": [
+      { "form": "Стива", "kind": "diminutive", "note": "his usual name — Anna's brother" },
+      { "form": "Облонский", "kind": "surname" },
+      { "form": "Облонского", "kind": "surname" },
+      { "form": "Степан Аркадьич", "kind": "full" }
+    ],
+    "role": "Anna's affable, philandering brother",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Дарья Александровна Облонская",
+    "given": "Дарья",
+    "patronymic": "Александровна",
+    "surname": "Облонская",
+    "forms": [
+      { "form": "Долли", "kind": "diminutive", "note": "her usual name — Stiva's wife" },
+      { "form": "Дарья Александровна", "kind": "full" }
+    ],
+    "role": "Stiva's long-suffering wife, Kitty's older sister",
+    "source": "manual",
+    "confidence": 1
+  }
+]

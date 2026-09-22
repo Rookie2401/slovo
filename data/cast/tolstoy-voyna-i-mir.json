@@ -1,0 +1,119 @@
+[
+  {
+    "canonical": "Пьер (Пётр Кириллович) Безухов",
+    "given": "Пётр",
+    "patronymic": "Кириллович",
+    "surname": "Безухов",
+    "forms": [
+      { "form": "Пьер", "kind": "given", "note": "his usual name" },
+      { "form": "Пьера", "kind": "given" },
+      { "form": "Пьеру", "kind": "given" },
+      { "form": "Безухов", "kind": "surname" },
+      { "form": "Безухова", "kind": "surname" },
+      { "form": "Безухову", "kind": "surname" }
+    ],
+    "role": "an illegitimate count's son seeking meaning, one of the two central protagonists",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Андрей Николаевич Болконский",
+    "given": "Андрей",
+    "patronymic": "Николаевич",
+    "surname": "Болконский",
+    "forms": [
+      { "form": "князь Андрей", "kind": "title", "note": "his usual reference" },
+      { "form": "Болконский", "kind": "surname" },
+      { "form": "Болконского", "kind": "surname" },
+      { "form": "Болконскому", "kind": "surname" }
+    ],
+    "role": "a disillusioned nobleman seeking glory and, later, meaning",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Наталья Ильинична Ростова",
+    "given": "Наталья",
+    "patronymic": "Ильинична",
+    "surname": "Ростова",
+    "forms": [
+      { "form": "Наташа", "kind": "diminutive", "note": "her usual name" },
+      { "form": "Наташи", "kind": "diminutive" },
+      { "form": "Наташе", "kind": "diminutive" },
+      { "form": "Наташу", "kind": "diminutive" },
+      { "form": "Ростова", "kind": "surname" }
+    ],
+    "role": "the vivacious young Rostov daughter, loved by both Andrei and Pierre",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Николай Ильич Ростов",
+    "given": "Николай",
+    "patronymic": "Ильич",
+    "surname": "Ростов",
+    "forms": [
+      { "form": "Николай Ростов", "kind": "full" },
+      { "form": "Николенька", "kind": "diminutive" },
+      { "form": "Ростов", "kind": "surname" },
+      { "form": "Ростова", "kind": "surname" }
+    ],
+    "role": "the eldest Rostov son, an earnest young cavalry officer",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Марья Николаевна Болконская",
+    "given": "Марья",
+    "patronymic": "Николаевна",
+    "surname": "Болконская",
+    "forms": [
+      { "form": "княжна Марья", "kind": "title", "note": "her usual reference — Andrei's sister" },
+      { "form": "Марьи", "kind": "given" },
+      { "form": "Марью", "kind": "given" }
+    ],
+    "role": "Andrei's devout, plain, inwardly strong sister",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Софья Александровна",
+    "given": "Софья",
+    "forms": [
+      { "form": "Соня", "kind": "diminutive", "note": "the Rostovs' ward and cousin" },
+      { "form": "Сони", "kind": "diminutive" },
+      { "form": "Соню", "kind": "diminutive" }
+    ],
+    "role": "the Rostovs' poor cousin and ward, in love with Nikolai",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Фёдор Иванович Долохов",
+    "given": "Фёдор",
+    "patronymic": "Иванович",
+    "surname": "Долохов",
+    "forms": [
+      { "form": "Долохов", "kind": "surname" },
+      { "form": "Долохова", "kind": "surname" },
+      { "form": "Долохову", "kind": "surname" }
+    ],
+    "role": "a reckless, dangerous officer and duelist",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Василий Дмитрич Денисов",
+    "given": "Василий",
+    "patronymic": "Дмитрич",
+    "surname": "Денисов",
+    "forms": [
+      { "form": "Денисов", "kind": "surname" },
+      { "form": "Денисова", "kind": "surname" },
+      { "form": "Денисову", "kind": "surname" }
+    ],
+    "role": "Nikolai Rostov's hussar squadron commander and friend",
+    "source": "manual",
+    "confidence": 1
+  }
+]

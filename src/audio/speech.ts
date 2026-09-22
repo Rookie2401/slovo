@@ -1,8 +1,9 @@
 /**
- * Audio via the Web Speech API. Quality depends on the device's Hindi voice
+ * Audio via the Web Speech API. Quality depends on the device's Russian voice
  * (Windows, Android and iOS ship one; some browsers have none). The UI only
- * offers audio when a Hindi voice exists, and never presents synthesized
- * speech as authoritative pronunciation.
+ * offers audio when a Russian voice exists, and never presents synthesized
+ * speech as authoritative pronunciation — pronunciation.pronounce() (package
+ * C) with its confidence is the authority; this is a convenience only.
  */
 let voices: SpeechSynthesisVoice[] = [];
 
@@ -15,18 +16,18 @@ if (typeof speechSynthesis !== 'undefined') {
   speechSynthesis.addEventListener?.('voiceschanged', refresh);
 }
 
-export function hindiVoice(): SpeechSynthesisVoice | null {
+export function russianVoice(): SpeechSynthesisVoice | null {
   if (typeof speechSynthesis === 'undefined') return null;
   if (!voices.length) refresh();
-  return voices.find((v) => /^hi([-_]|$)/i.test(v.lang)) ?? voices.find((v) => /hindi/i.test(v.name)) ?? null;
+  return voices.find((v) => /^ru([-_]|$)/i.test(v.lang)) ?? voices.find((v) => /russian|русск/i.test(v.name)) ?? null;
 }
 
 export function audioAvailable(): boolean {
-  return hindiVoice() !== null;
+  return russianVoice() !== null;
 }
 
-export function speak(text: string, rate = 0.9): boolean {
-  const v = hindiVoice();
+export function speak(text: string, rate = 0.95): boolean {
+  const v = russianVoice();
   if (!v) return false;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);

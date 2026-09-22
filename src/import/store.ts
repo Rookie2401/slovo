@@ -1,7 +1,7 @@
 import { db } from '../database/db';
 import { clearAnalysisMemo } from '../database/analysis';
 import type { Book, Chapter, Paragraph, Sentence, Token } from '../database/types';
-import { looseKey, normalize, sentenceRanges, tokenize } from '../tokenizer/devanagari';
+import { looseKey, normalize, sentenceRanges, sourceStressIndex, tokenize } from '../tokenizer/cyrillic';
 import type { ImportedBook, ImportedParagraph } from './types';
 import { ImportRefused } from './types';
 
@@ -52,6 +52,9 @@ function paragraphRecords(p: ImportedParagraph): { text: string; kind: Paragraph
 /**
  * Persist an imported book. Runs in one transaction so a failed import leaves
  * nothing behind. `appendTo` adds the chapters to an existing book instead.
+ * Stress marks present in the source (Wikisource Azbuka editions) are kept in
+ * `surface_original` and their position recorded as `source_stress`; they are
+ * stripped from `surface_normalized` and from the dictionary key.
  */
 export async function storeBook(book: ImportedBook, opts: { appendTo?: number; onProgress?: (done: number, total: number) => void } = {}): Promise<StoreResult> {
   if (book.chapters.length === 0) throw new ImportRefused('Nothing to import.', 'empty');
@@ -73,7 +76,7 @@ export async function storeBook(book: ImportedBook, opts: { appendTo?: number; o
       const rec: Book = {
         title: book.title,
         author: book.author,
-        language: 'hi',
+        language: 'ru',
         source_format: book.source_format,
         source_name: book.source_name,
         license: book.license,
@@ -81,6 +84,10 @@ export async function storeBook(book: ImportedBook, opts: { appendTo?: number; o
         chapter_count: 0,
         token_count: 0,
         content_hash: hash,
+        slug: book.slug,
+        level: book.level,
+        year: book.year,
+        has_english: book.has_english,
       };
       bookId = (await db.books.add(rec)) as number;
     }
@@ -88,7 +95,7 @@ export async function storeBook(book: ImportedBook, opts: { appendTo?: number; o
     let tokenTotal = 0;
     for (let ci = 0; ci < book.chapters.length; ci++) {
       const ch = book.chapters[ci]!;
-      const chRec: Chapter = { book_id: bookId, index: chapterOffset + ci, title: ch.title, title_original: ch.title_original, paragraph_count: ch.paragraphs.length, token_count: 0, source_ref: ch.source_ref };
+      const chRec: Chapter = { book_id: bookId, index: chapterOffset + ci, title: ch.title, title_original: ch.title_original, part: ch.part, paragraph_count: ch.paragraphs.length, token_count: 0, source_ref: ch.source_ref };
       const chapterId = (await db.chapters.add(chRec)) as number;
       chapterIds.push(chapterId);
       let chTokens = 0;
@@ -112,6 +119,7 @@ export async function storeBook(book: ImportedBook, opts: { appendTo?: number; o
           const pidx = paraCounters.get(paraId) ?? 0;
           paraCounters.set(paraId, pidx + 1);
           const norm = normalize(t.text);
+          const stress = t.kind === 'word' ? sourceStressIndex(t.text) : -1;
           tokRecs.push({
             book_id: bookId,
             chapter_id: chapterId,
@@ -125,6 +133,7 @@ export async function storeBook(book: ImportedBook, opts: { appendTo?: number; o
             surface_original: t.text,
             surface_normalized: norm,
             key: t.kind === 'word' ? looseKey(norm) : norm,
+            source_stress: stress >= 0 ? stress : undefined,
           });
         });
       });
@@ -142,7 +151,7 @@ export async function storeBook(book: ImportedBook, opts: { appendTo?: number; o
 }
 
 export async function deleteBook(bookId: number, opts: { purgeStudyData?: boolean } = {}): Promise<void> {
-  await db.transaction('rw', [db.books, db.chapters, db.paragraphs, db.sentences, db.tokens, db.token_analyses, db.constructions, db.dependencies, db.translations, db.explanations, db.reading_progress, db.analysis_versions, db.word_encounters, db.user_corrections], async () => {
+  await db.transaction('rw', [db.books, db.chapters, db.paragraphs, db.sentences, db.tokens, db.token_analyses, db.constructions, db.dependencies, db.translations, db.explanations, db.characters, db.parallel_texts, db.reading_progress, db.analysis_versions, db.word_encounters, db.user_corrections], async () => {
     await db.tokens.where('book_id').equals(bookId).delete();
     await db.sentences.where('book_id').equals(bookId).delete();
     await db.paragraphs.where('book_id').equals(bookId).delete();
@@ -152,6 +161,8 @@ export async function deleteBook(bookId: number, opts: { purgeStudyData?: boolea
     await db.dependencies.where('book_id').equals(bookId).delete();
     await db.translations.where('book_id').equals(bookId).delete();
     await db.explanations.where('book_id').equals(bookId).delete();
+    await db.characters.where('book_id').equals(bookId).delete();
+    await db.parallel_texts.where('book_id').equals(bookId).delete();
     await db.reading_progress.where('book_id').equals(bookId).delete();
     await db.analysis_versions.where('book_id').equals(bookId).delete();
     if (opts.purgeStudyData) {

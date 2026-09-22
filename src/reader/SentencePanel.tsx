@@ -6,7 +6,6 @@ import type { Settings } from '../database/settings';
 import { aiEnabled, explainSentence, loadExplanation, saveExplanation, type AiExplanation } from '../ai/claude';
 import { audioAvailable, speak } from '../audio/speech';
 import { correctSentence } from '../database/analysis';
-import { describeFeatures } from '../syntax/clause';
 
 interface Props {
   sentence: Sentence;
@@ -24,10 +23,12 @@ interface Props {
   onCorrected: () => void;
 }
 
+const CONSTRUCTION_HEAD_TYPES = new Set(['aspect', 'motion', 'reflexive', 'impersonal', 'passive', 'modal']);
+
 export function SentencePanel(p: Props) {
   const { sentence, tokens, analysis, settings } = p;
-  const [showGloss, setShowGloss] = useState(settings.englishAssist === 'always');
   const [showGrammar, setShowGrammar] = useState(true);
+  const [showGloss, setShowGloss] = useState(false);
   const [showTree, setShowTree] = useState(false);
   const [ai, setAi] = useState<AiExplanation | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
@@ -35,7 +36,7 @@ export function SentencePanel(p: Props) {
   const [editing, setEditing] = useState(false);
   const [natural, setNatural] = useState(p.correction?.natural ?? '');
   const [literal, setLiteral] = useState(p.correction?.literal ?? '');
-  const [hiSimple, setHiSimple] = useState(settings.explainLanguage === 'hi-simple');
+  const [ruSimple, setRuSimple] = useState(settings.explainLanguage === 'ru-simple');
 
   useEffect(() => {
     let alive = true;
@@ -54,7 +55,7 @@ export function SentencePanel(p: Props) {
     setAiBusy(true);
     setAiErr(null);
     try {
-      const e = await explainSentence(sentence.text, analysis, { hindiSimple: hiSimple });
+      const e = await explainSentence(sentence.text, analysis, { ruSimple });
       await saveExplanation(p.bookId, sentence.id!, e);
       setAi(e);
     } catch (e) {
@@ -64,10 +65,8 @@ export function SentencePanel(p: Props) {
     }
   };
 
-  const verbCs = analysis.constructions.filter((c) => ['tam', 'compound-verb', 'modal', 'passive'].includes(c.type));
-  const otherCs = analysis.constructions.filter((c) => !['tam', 'compound-verb', 'modal', 'passive', 'noun-phrase'].includes(c.type));
-  const npCs = analysis.constructions.filter((c) => c.type === 'noun-phrase');
-  const clause = analysis.clause;
+  const headCs = analysis.constructions.filter((c) => CONSTRUCTION_HEAD_TYPES.has(c.type));
+  const otherCs = analysis.constructions.filter((c) => !CONSTRUCTION_HEAD_TYPES.has(c.type));
   const tokAt = (i: number) => tokens[i];
   const naturalText = p.correction?.natural || ai?.natural;
   const literalText = p.correction?.literal || ai?.literal;
@@ -79,12 +78,12 @@ export function SentencePanel(p: Props) {
         {audioAvailable() && <IconBtn label="Play" onClick={() => speak(sentence.text, settings.speechRate)}>{I.sound}</IconBtn>}
         <IconBtn label="Close" onClick={p.onClose}>{I.close}</IconBtn>
       </div>
-      <div className="smode__dv" lang="hi">
+      <div className="smode__dv ru" lang="ru">
         {analysis.tokens.map((_at, i) => {
           const t = tokAt(i);
           if (!t) return null;
-          const inVerb = verbCs.find((c) => c.tokens.includes(i));
-          const cls = t.kind === 'word' ? `w${p.selectedToken === t.id ? ' sel' : ''}${inVerb ? ' ph' : ''}` : 'punct';
+          const inHead = headCs.find((c) => c.tokens.includes(i));
+          const cls = t.kind === 'word' ? `w${p.selectedToken === t.id ? ' sel' : ''}${inHead ? ' ph' : ''}` : 'punct';
           return (
             <span key={t.id}>
               {i > 0 && t.kind === 'word' ? ' ' : ''}
@@ -97,43 +96,47 @@ export function SentencePanel(p: Props) {
       {/* structure sketch: always available, deterministic */}
       <div className="smode__layer">
         <div className="label">Structure <small>deterministic</small></div>
-        {verbCs.length === 0 && <p className="card__text">No finite verb found — a fragment, a heading, or a nominal sentence.</p>}
-        {analysis.clauses.filter((cl) => cl.verb).map((cl, ci, arr) => (
+        {analysis.clauses.length === 0 && <p className="card__text">No finite verb found — a fragment, a heading, or a nominal sentence.</p>}
+        {analysis.clauses.map((cl, ci, arr) => (
           <div key={ci}>
-            {arr.length > 1 && <div className="cons__label" style={{ marginTop: '0.6rem' }}>Clause {ci + 1} of {arr.length}: <span className="dv">{analysis.tokens.slice(cl.range?.[0] ?? 0, cl.range?.[1] ?? analysis.tokens.length).map((t) => t.text).join(' ')}</span></div>}
-            {verbCs.filter((c) => c.tokens.every((t) => t >= (cl.range?.[0] ?? 0) && t < (cl.range?.[1] ?? analysis.tokens.length))).map((c, i) => <ConstructionCard key={i} c={c} analysis={analysis} verb onHighlight={p.onHighlightConstruction} />)}
+            {arr.length > 1 && <div className="cons__label" style={{ marginTop: '0.6rem' }}>Clause {ci + 1} of {arr.length}: <span className="ru">{analysis.tokens.slice(cl.range?.[0] ?? 0, cl.range?.[1] ?? analysis.tokens.length).map((t) => t.text).join(' ')}</span></div>}
+            {headCs.filter((c) => c.tokens.every((t) => t >= (cl.range?.[0] ?? 0) && t < (cl.range?.[1] ?? analysis.tokens.length))).map((c, i) => <ConstructionCard key={i} c={c} analysis={analysis} verb onHighlight={p.onHighlightConstruction} />)}
+            {cl.aspect && (
+              <div className="card__why">
+                <b>Aspect.</b> {cl.aspect.explanation}
+                {cl.aspect.contrast && <> <i>{cl.aspect.contrast}</i></>}
+              </div>
+            )}
             {cl.agreement && (
               <div className="card__why">
                 <b>Agreement.</b> {cl.agreement.explanation}
                 {cl.agreement.matches === false && <span className="card__err"> Mismatch flagged.</span>}
               </div>
             )}
-            {cl.ergativity && (
-              <div className="card__why">
-                <b>Ergativity.</b> {cl.ergativity.explanation}
-                {cl.ergativity.contrast && <> <i>{cl.ergativity.contrast}</i></>}
-              </div>
-            )}
+            {cl.wordOrder && <div className="card__why"><b>Word order.</b> {cl.wordOrder}</div>}
             {cl.notes.map((n, i) => <div key={i} className="card__why">{n}</div>)}
           </div>
         ))}
       </div>
 
-      <Reveal label="Grammar" hint="constructions · agreement" open={showGrammar} onToggle={() => setShowGrammar(!showGrammar)} />
+      <Reveal label="Grammar" hint="constructions · roles" open={showGrammar} onToggle={() => setShowGrammar(!showGrammar)} />
       {showGrammar && (
         <div>
           {otherCs.map((c, i) => <ConstructionCard key={i} c={c} analysis={analysis} onHighlight={p.onHighlightConstruction} />)}
-          {npCs.map((c, i) => <ConstructionCard key={'np' + i} c={c} analysis={analysis} onHighlight={p.onHighlightConstruction} />)}
-          {clause.subject !== undefined && <p className="card__text"><b>Subject:</b> <span className="dv">{analysis.tokens[clause.subject]!.text}</span> ({describeFeatures(chosen(analysis.tokens[clause.subject]!)?.features ?? {})})</p>}
-          {clause.experiencer !== undefined && <p className="card__text"><b>Experiencer (logical subject, with को):</b> <span className="dv">{analysis.tokens[clause.experiencer]!.text}</span></p>}
-          {clause.agent !== undefined && <p className="card__text"><b>Agent (with ने):</b> <span className="dv">{analysis.tokens[clause.agent]!.text}</span></p>}
-          {clause.object !== undefined && <p className="card__text"><b>{clause.verb?.pattern.startsWith('copula') ? 'Predicate' : 'Object'}:</b> <span className="dv">{analysis.tokens[clause.object]!.text}</span>{clause.objectMarked ? ' (marked with को)' : ' (unmarked)'}</p>}
-          {clause.indirectObject !== undefined && <p className="card__text"><b>Indirect object:</b> <span className="dv">{analysis.tokens[clause.indirectObject]!.text}</span></p>}
-          <p className="muted-note">Word order: Hindi is verb-final; the object normally precedes the verb and postpositions follow their noun.</p>
+          {analysis.clauses.map((cl, ci) => (
+            <div key={ci}>
+              {cl.subject !== undefined && <p className="card__text"><b>Subject:</b> <span className="ru">{analysis.tokens[cl.subject]!.text}</span></p>}
+              {cl.experiencer !== undefined && <p className="card__text"><b>Dative experiencer:</b> <span className="ru">{analysis.tokens[cl.experiencer]!.text}</span></p>}
+              {cl.possessor !== undefined && <p className="card__text"><b>Possessor (у + genitive):</b> <span className="ru">{analysis.tokens[cl.possessor]!.text}</span></p>}
+              {cl.object !== undefined && <p className="card__text"><b>Object:</b> <span className="ru">{analysis.tokens[cl.object]!.text}</span></p>}
+              {cl.indirectObject !== undefined && <p className="card__text"><b>Indirect object:</b> <span className="ru">{analysis.tokens[cl.indirectObject]!.text}</span></p>}
+            </div>
+          ))}
+          <p className="muted-note">Word order is comparatively free in Russian; case endings, not position, mark the grammatical roles.</p>
         </div>
       )}
 
-      <Reveal label="Word by word" hint={settings.englishAssist === 'off' ? 'off in settings' : 'English glosses'} open={showGloss} onToggle={() => setShowGloss(!showGloss)} />
+      <Reveal label="Word by word" hint="glosses" open={showGloss} onToggle={() => setShowGloss(!showGloss)} />
       {showGloss && (
         <div className="gloss-grid">
           {analysis.tokens.map((at, i) => {
@@ -143,7 +146,7 @@ export function SentencePanel(p: Props) {
             const st = p.statuses.get(c.key)?.status;
             return (
               <span key={t.id} style={{ display: 'contents' }}>
-                <span className="dv">{t.surface_original}</span>
+                <span className="ru">{t.surface_original}</span>
                 <span className={`g${st === 'known' || st === 'mastered' ? ' known' : ''}`}>{at.glossInContext ?? c.gloss}</span>
               </span>
             );
@@ -162,13 +165,13 @@ export function SentencePanel(p: Props) {
               {ai.points.map((pt, i) => <p key={i} className="card__text"><b>{pt.topic}.</b> {pt.text}</p>)}
               {ai.alternatives && ai.alternatives.length > 0 && <p className="card__text"><b>Two analyses are possible.</b> {ai.alternatives.join(' / ')}</p>}
               {ai.uncertainty && <p className="muted-note">Uncertainty: {ai.uncertainty}</p>}
-              {ai.hindi_simple && <p className="card__text dv" lang="hi" style={{ fontSize: '1.1rem' }}>{ai.hindi_simple}</p>}
+              {ai.ru_simple && <p className="card__text ru" lang="ru" style={{ fontSize: '1.1rem' }}>{ai.ru_simple}</p>}
             </div>
           )}
           <div className="card__actions">
             <button className="btn btn--small" onClick={() => setEditing(true)}>Edit</button>
             {aiEnabled() && <button className="btn btn--small" onClick={() => void askAi()} disabled={aiBusy}>{aiBusy ? 'Asking…' : 'Ask again'}</button>}
-            <label className="muted-note" style={{ display: 'inline-flex', gap: '0.3rem', alignItems: 'center' }}><input type="checkbox" checked={hiSimple} onChange={(e) => setHiSimple(e.target.checked)} /> simple Hindi</label>
+            <label className="muted-note" style={{ display: 'inline-flex', gap: '0.3rem', alignItems: 'center' }}><input type="checkbox" checked={ruSimple} onChange={(e) => setRuSimple(e.target.checked)} /> simple Russian</label>
           </div>
           {p.correction?.natural && <p className="card__prov">Your translation. {ai ? 'A model translation exists underneath.' : ''}</p>}
           {!p.correction?.natural && ai && <p className="card__prov">Language-model rendering, generated from the deterministic analysis above; it cannot change the grammar.</p>}
@@ -189,7 +192,7 @@ export function SentencePanel(p: Props) {
 
       <Reveal label="Dependency sketch" hint="who depends on what" open={showTree} onToggle={() => setShowTree(!showTree)} />
       {showTree && <DependencyTree analysis={analysis} />}
-      <p className="card__prov">Deterministic rules v{analysis.rulesVersion}. Relations carry confidences; relative and complement clauses are marked, not fully parsed.</p>
+      <p className="card__prov">Deterministic rules v{analysis.rulesVersion}. Relations carry confidences; clauses are split, not fully attached.</p>
     </aside>
   );
 }
@@ -199,7 +202,7 @@ export function ConstructionCard({ c, analysis, verb, onHighlight }: { c: FoundC
   return (
     <div className={`cons${verb ? ' cons--verb' : ''}`}>
       <button style={{ display: 'block', width: '100%', textAlign: 'left' }} onClick={() => { setOpen(!open); onHighlight(open ? null : c); }} aria-expanded={open}>
-        <div className="cons__head"><span className="dv">{c.tokens.map((k) => analysis.tokens[k]!.text).join(' ')}</span><span className="g">{c.gloss}</span></div>
+        <div className="cons__head"><span className="ru">{c.tokens.map((k) => analysis.tokens[k]!.text).join(' ')}</span><span className="g">{c.gloss}</span></div>
         <div className="cons__label">{c.label}</div>
       </button>
       {open && (
@@ -207,13 +210,13 @@ export function ConstructionCard({ c, analysis, verb, onHighlight }: { c: FoundC
           <div className="cons__parts">
             {c.tokens.map((k) => (
               <span key={k} style={{ display: 'contents' }}>
-                <span className="dv">{analysis.tokens[k]!.text}</span>
+                <span className="ru">{analysis.tokens[k]!.text}</span>
                 <span>{c.roles[k] ?? ''}{chosen(analysis.tokens[k]!) ? ` — ${chosen(analysis.tokens[k]!)!.lemma}${roleFeatures(analysis.tokens[k]!)}` : ''}</span>
               </span>
             ))}
           </div>
           <p className="cons__text">{c.explanation}</p>
-          {c.features.nuance && <p className="cons__text"><b>Nuance:</b> {c.features.nuance}</p>}
+          {c.features?.nuance && <p className="cons__text"><b>Nuance:</b> {c.features.nuance}</p>}
           {c.uncertain && <p className="muted-note">{c.uncertain}</p>}
         </>
       )}
@@ -225,7 +228,7 @@ function roleFeatures(t: SentenceAnalysis['tokens'][number]): string {
   const c = chosen(t);
   if (!c) return '';
   const f = c.features;
-  const bits = [f.verb_form?.replace(/-/g, ' '), f.gender === 'm' ? 'm' : f.gender === 'f' ? 'f' : '', f.number, f.person ? `${f.person}p` : ''].filter(Boolean);
+  const bits = [f.verb_form?.replace(/-/g, ' '), f.gender ?? '', f.number, f.case, f.person ? `${f.person}p` : ''].filter(Boolean);
   return bits.length ? ` (${bits.join(' ')})` : '';
 }
 
@@ -240,7 +243,7 @@ function DependencyTree({ analysis }: { analysis: SentenceAnalysis }) {
     const kids = children(i);
     return (
       <div>
-        <div className="tree__node"><span className="tree__rel">{rel}</span><span className="dv">{analysis.tokens[i]!.text}</span><span className="faint" style={{ fontSize: '0.85rem' }}>{chosen(analysis.tokens[i]!)?.gloss}</span></div>
+        <div className="tree__node"><span className="tree__rel">{rel}</span><span className="ru">{analysis.tokens[i]!.text}</span><span className="faint" style={{ fontSize: '0.85rem' }}>{chosen(analysis.tokens[i]!)?.gloss}</span></div>
         {kids.length > 0 && <div className="tree__children">{kids.map((k) => <Node key={k.dependent} i={k.dependent} rel={k.relation} depth={depth + 1} />)}</div>}
       </div>
     );
@@ -251,7 +254,7 @@ function DependencyTree({ analysis }: { analysis: SentenceAnalysis }) {
       {roots.map((r) => <Node key={r} i={r} rel="root" depth={0} />)}
       <div className="deps" style={{ marginTop: '0.6rem' }}>
         {deps.filter((d) => d.explanation && d.relation !== 'agreement-target').slice(0, 8).map((d, i) => (
-          <div key={i} className="dep"><span className="dv">{analysis.tokens[d.dependent]!.text}</span><span className="rel">{d.relation}</span><span className="head">{d.head == null ? 'ROOT' : <span className="dv">{analysis.tokens[d.head]!.text}</span>} <small className="faint">{d.explanation}</small></span></div>
+          <div key={i} className="dep"><span className="ru">{analysis.tokens[d.dependent]!.text}</span><span className="rel">{d.relation}</span><span className="head">{d.head == null ? 'ROOT' : <span className="ru">{analysis.tokens[d.head]!.text}</span>} <small className="faint">{d.explanation}</small></span></div>
         ))}
       </div>
     </div>

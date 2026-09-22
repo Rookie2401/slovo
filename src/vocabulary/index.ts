@@ -29,7 +29,6 @@ export function lexemeKeysOf(a: SentenceAnalysis, tokens: Token[]): Array<{ key:
     const t = tokens[i];
     const c = chosen(at);
     if (!t || t.kind !== 'word' || !c) return;
-    if (c.pos === 'punct' as unknown) return;
     out.push({ key: c.key, form: t.key, token: t });
   });
   return out;

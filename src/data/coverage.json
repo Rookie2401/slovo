@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-09-22T21:24:30.180Z",
+  "mode": "corpus-restricted",
+  "lexeme_count": 58806,
+  "form_count": 89156,
+  "ranked_lexeme_count": 11653,
+  "others_csv": {
+    "skipped_pronoun_case_forms": 16,
+    "pos_guessed": 4811,
+    "total_rows": 5031
+  },
+  "unresolved_aspect_gender_partners": 5586,
+  "overrides_applied": 4,
+  "coverage": {
+    "overall": 0.8637293226516153,
+    "by_work": {
+      "dostoevsky-bednye-lyudi": 0.8627422480620155,
+      "dostoevsky-belye-nochi": 0.8819267090336759,
+      "dostoevsky-besy": 0.8649965474115244,
+      "dostoevsky-bobok": 0.8819320214669052,
+      "dostoevsky-bratya-karamazovy": 0.8591755884247899,
+      "dostoevsky-chestny-vor": 0.8394860289618601,
+      "dostoevsky-dvoynik": 0.8522254034357105,
+      "dostoevsky-idiot": 0.8683116216700312,
+      "dostoevsky-igrok": 0.8751223732440863,
+      "dostoevsky-krotkaya": 0.9098342377164944,
+      "dostoevsky-malchik-u-khrista": 0.9038989566172433,
+      "dostoevsky-podrostok": 0.8771234851316,
+      "dostoevsky-prestuplenie-i-nakazanie": 0.8654516341716115,
+      "dostoevsky-son-smeshnogo-cheloveka": 0.8982746721877156,
+      "dostoevsky-yolka-i-svadba": 0.8699257965953732,
+      "dostoevsky-zapiski-iz-podpolya": 0.8898066884644066,
+      "tolstoy-alyosha-gorshok": 0.8651817116060961,
+      "tolstoy-anna-karenina": 0.8510018621973929,
+      "tolstoy-detstvo": 0.8716881023540078,
+      "tolstoy-first-reader": 0.8982099353882004,
+      "tolstoy-fourth-reader": 0.9064576411960132,
+      "tolstoy-kavkazsky-plennik": 0.8873908380573005,
+      "tolstoy-khadzhi-murat": 0.8382149446494465,
+      "tolstoy-kholstomer": 0.8780917172784086,
+      "tolstoy-khozyain-i-rabotnik": 0.8424681879576313,
+      "tolstoy-kreytserova-sonata": 0.9058077304261645,
+      "tolstoy-otets-sergiy": 0.8786480047647409,
+      "tolstoy-second-reader": 0.9027333333333334,
+      "tolstoy-smert-ivana-ilyicha": 0.864500518492914,
+      "tolstoy-third-reader": 0.898515686494996,
+      "tolstoy-tri-smerti": 0.8845630274979581,
+      "tolstoy-voskresenie": 0.8687802438629778,
+      "tolstoy-voyna-i-mir": 0.8519443139777284
+    }
+  }
+}

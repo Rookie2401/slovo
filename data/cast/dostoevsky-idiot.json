@@ -1,0 +1,87 @@
+[
+  {
+    "canonical": "Лев Николаевич Мышкин",
+    "given": "Лев",
+    "patronymic": "Николаевич",
+    "surname": "Мышкин",
+    "forms": [
+      { "form": "Мышкин", "kind": "surname" },
+      { "form": "Мышкина", "kind": "surname" },
+      { "form": "князь Мышкин", "kind": "title" },
+      { "form": "Лев Николаевич", "kind": "full" }
+    ],
+    "role": "the epileptic, guileless \"idiot\" prince — a Christ-like figure returning to society",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Настасья Филипповна Барашкова",
+    "given": "Настасья",
+    "patronymic": "Филипповна",
+    "surname": "Барашкова",
+    "forms": [
+      { "form": "Настасья Филипповна", "kind": "full" },
+      { "form": "Настасьи Филипповны", "kind": "full" },
+      { "form": "Настасью Филипповну", "kind": "full" }
+    ],
+    "role": "a beautiful, self-destructive woman fought over by Myshkin and Rogozhin",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Парфён Семёнович Рогожин",
+    "given": "Парфён",
+    "patronymic": "Семёнович",
+    "surname": "Рогожин",
+    "forms": [
+      { "form": "Рогожин", "kind": "surname" },
+      { "form": "Рогожина", "kind": "surname" },
+      { "form": "Рогожину", "kind": "surname" },
+      { "form": "Парфен", "kind": "given", "note": "this edition prints ё as е" }
+    ],
+    "role": "a merchant's son, consumed by his passion for Nastasya Filippovna",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Аглая Ивановна Епанчина",
+    "given": "Аглая",
+    "patronymic": "Ивановна",
+    "surname": "Епанчина",
+    "forms": [
+      { "form": "Аглая", "kind": "given" },
+      { "form": "Аглаи", "kind": "given" },
+      { "form": "Аглае", "kind": "given" },
+      { "form": "Аглаю", "kind": "given" }
+    ],
+    "role": "the youngest Epanchin daughter, drawn to Myshkin",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Гаврила Ардалионович Иволгин",
+    "given": "Гаврила",
+    "patronymic": "Ардалионович",
+    "surname": "Иволгин",
+    "forms": [
+      { "form": "Ганя", "kind": "diminutive", "note": "his usual name" },
+      { "form": "Гани", "kind": "diminutive" },
+      { "form": "Ганю", "kind": "diminutive" }
+    ],
+    "role": "an ambitious young man who courts Nastasya Filippovna for her money",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Лизавета Прокофьевна Епанчина",
+    "given": "Лизавета",
+    "patronymic": "Прокофьевна",
+    "surname": "Епанчина",
+    "forms": [
+      { "form": "Лизавета Прокофьевна", "kind": "full" }
+    ],
+    "role": "the Epanchin matriarch, distantly related to Myshkin",
+    "source": "manual",
+    "confidence": 1
+  }
+]

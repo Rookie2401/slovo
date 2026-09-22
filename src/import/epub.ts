@@ -2,7 +2,7 @@ import JSZip from 'jszip';
 import { blocksToChapters, extractBlocks, parseHtmlDocument } from './html';
 import type { ImportedBook, ImportedChapter } from './types';
 import { ImportRefused } from './types';
-import { hasDevanagari } from '../tokenizer/devanagari';
+import { hasCyrillic } from '../tokenizer/cyrillic';
 
 const FONT_OBFUSCATION = new Set(['http://www.idpf.org/2008/embedding', 'http://ns.adobe.com/pdf/enc#RC']);
 
@@ -145,7 +145,7 @@ export async function importEpub(data: ArrayBuffer | Uint8Array | Blob, sourceNa
     const label = labels.get(path) ?? doc.querySelector('h1, h2, h3')?.textContent?.trim() ?? doc.querySelector('title')?.textContent?.trim() ?? item.href;
     const parts = blocksToChapters(blocks, label, item.href);
     for (const ch of parts) {
-      const words = ch.paragraphs.reduce((n, p) => n + p.text.split(/\s+/).filter((w) => hasDevanagari(w)).length, 0);
+      const words = ch.paragraphs.reduce((n, p) => n + p.text.split(/\s+/).filter((w) => hasCyrillic(w)).length, 0);
       const frontMatter = /cover|copyright|titlepage|title-page|toc|nav|contents|colophon/i.test(item.href) || /cover|copyright/i.test(label);
       if (words < 3 || (frontMatter && words < 60)) {
         skipped++;
@@ -155,7 +155,7 @@ export async function importEpub(data: ArrayBuffer | Uint8Array | Blob, sourceNa
     }
   }
   if (skipped) warnings.push(`${skipped} front-matter or empty section(s) were skipped (cover, copyright, navigation).`);
-  if (chapters.length === 0) throw new ImportRefused('The EPUB contains no Hindi text in its reading order.', 'empty');
-  if (m.language && !/^hi/i.test(m.language)) warnings.push(`The EPUB declares language "${m.language}", not Hindi. It was imported anyway.`);
+  if (chapters.length === 0) throw new ImportRefused('The EPUB contains no Russian text in its reading order.', 'empty');
+  if (m.language && !/^ru/i.test(m.language)) warnings.push(`The EPUB declares language "${m.language}", not Russian. It was imported anyway.`);
   return { title: m.title, author: m.author, language: m.language, license: m.rights, source_format: 'epub', source_name: sourceName, chapters, warnings };
 }

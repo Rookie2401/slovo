@@ -1,33 +1,40 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { KnownWord, LearningStatus, MorphFeatures, Sentence, Token } from '../database/types';
-import type { Candidate } from '../lexicon';
+import type { Candidate } from '../morphology/candidate';
 import { chosen, type AnalyzedToken, type FoundConstruction, type SentenceAnalysis } from '../morphology/sentence';
-import { pronounce, practical } from '../pronunciation/translit';
+import { pronounce } from '../pronunciation';
+import { withAcute } from '../dictionary/accent';
 import { audioAvailable, speak } from '../audio/speech';
 import { I, IconBtn, Reveal, SOURCE_LABEL, confidenceLabel } from '../ui/components';
 import type { Settings } from '../database/settings';
-import { AksharaStrip } from './AksharaDetail';
 import { Paradigm } from './Paradigm';
+import { lexeme } from '../dictionary';
+import type { DictLexeme } from '../dictionary/types';
 import { STATUS_ORDER, STATUS_LABEL, lexemeStats, type LexemeStats } from '../vocabulary';
-import { NOUN_CLASS_LABEL } from '../morphology/nouns';
 import { CorrectForm } from './CorrectForm';
+import { LetterStrip } from './LetterDetail';
+
+const CASE_LABEL: Record<string, string> = { nom: 'nominative', gen: 'genitive', dat: 'dative', acc: 'accusative', inst: 'instrumental', prep: 'prepositional', loc: 'second locative', part: 'partitive', voc: 'vocative' };
 
 export function featureWords(f: MorphFeatures, pos: string): string[] {
   const out: string[] = [];
-  if (f.gender) out.push(f.gender === 'm' ? 'masculine' : 'feminine');
+  if (f.gender) out.push(f.gender === 'm' ? 'masculine' : f.gender === 'f' ? 'feminine' : f.gender === 'n' ? 'neuter' : 'common');
   if (f.number) out.push(f.number === 'sg' ? 'singular' : 'plural');
-  if (f.case) out.push(f.case);
+  if (f.case) out.push(CASE_LABEL[f.case] ?? f.case);
   if (f.person) out.push(`${f.person}${f.person === 1 ? 'st' : f.person === 2 ? 'nd' : 'rd'} person`);
-  if (f.honorific) out.push(f.honorific);
+  if (f.animacy && pos === 'noun') out.push(f.animacy === 'anim' ? 'animate' : 'inanimate');
+  if (f.aspect) out.push(f.aspect === 'perfective' ? 'perfective' : f.aspect === 'imperfective' ? 'imperfective' : 'biaspectual');
   if (f.verb_form) out.push(f.verb_form.replace(/-/g, ' '));
-  if (f.tense && pos === 'verb' && !f.verb_form?.includes('aux')) out.push(f.tense);
-  if (f.mood && f.mood !== 'indicative' && !f.verb_form) out.push(f.mood);
-  if (f.fused_postposition) out.push(`+ ${f.fused_postposition}`);
+  // the tense is implicit in the past form and in a participle/gerund label; say it only for present-future
+  if (f.tense && pos === 'verb' && f.verb_form === 'present-future') out.push(f.tense);
+  if (f.mood && f.mood !== 'indicative') out.push(f.mood);
+  if (f.degree && f.degree !== 'positive') out.push(f.degree);
+  if (f.reflexive) out.push('reflexive (-ся)');
   return out;
 }
 
-const POS_LABEL: Record<string, string> = { noun: 'noun', proper: 'proper noun', pronoun: 'pronoun', adjective: 'adjective', verb: 'verb', adverb: 'adverb', postposition: 'postposition', conjunction: 'conjunction', particle: 'particle', interjection: 'interjection', number: 'numeral', determiner: 'determiner', auxiliary: 'auxiliary', unknown: 'unknown' };
+const POS_LABEL: Record<string, string> = { noun: 'noun', proper: 'proper noun', pronoun: 'pronoun', adjective: 'adjective', verb: 'verb', adverb: 'adverb', preposition: 'preposition', conjunction: 'conjunction', particle: 'particle', interjection: 'interjection', numeral: 'numeral', predicative: 'predicative', unknown: 'unknown' };
 
 interface Props {
   token: Token;
@@ -47,36 +54,39 @@ interface Props {
 }
 
 export function WordPanel(p: Props) {
-  const { token, at, analysis, settings, known, status } = p;
+  const { token, at, analysis, settings, status, known } = p;
   const c = chosen(at);
   const [level, setLevel] = useState<1 | 2 | 3>(1);
-  const [akOpen, setAkOpen] = useState<number | null>(null);
   const [stats, setStats] = useState<LexemeStats | null>(null);
+  const [entry, setEntry] = useState<DictLexeme | undefined>(undefined);
   const [correcting, setCorrecting] = useState(false);
   const [pick, setPick] = useState<number>(at.chosen);
+  const [letterOpen, setLetterOpen] = useState<number | null>(null);
   useEffect(() => {
     setLevel(1);
-    setAkOpen(null);
     setCorrecting(false);
     setPick(at.chosen);
+    setLetterOpen(null);
   }, [token.id, at.chosen]);
   useEffect(() => {
     let alive = true;
     if (!c) return;
     lexemeStats(c.key).then((s) => alive && setStats(s)).catch(() => {});
+    lexeme(c.key).then((e) => alive && setEntry(e)).catch(() => alive && setEntry(undefined));
     return () => {
       alive = false;
     };
   }, [c?.key, token.id, status?.updated_at]);
   if (!c) return null;
   const cand: Candidate = at.candidates[pick] ?? c;
-  const pron = pronounce(token.surface_normalized, cand.entry?.pron);
-  const showTranslit = settings.translit !== 'never';
+  const stressIdx = cand.features.stress != null && cand.features.stress >= 0 ? cand.features.stress : -1;
+  const pron = pronounce(token.surface_normalized, stressIdx);
+  const showTranslit = settings.translitMode !== 'never';
   const cons = analysis.constructions.filter((x) => x.tokens.includes(at.i));
-  const beginner = settings.scriptLevel === 'none' || settings.scriptLevel === 'some';
   const feats = featureWords(cand.features, cand.pos);
   const glossCtx = at.glossInContext;
   const isGuess = cand.key.startsWith('?');
+  const accentedLemma = cand.lemmaAccented ?? cand.lemma;
   const alternatives = at.candidates.filter((x, i) => i !== at.chosen && (x.lemma !== c.lemma || x.pos !== c.pos || JSON.stringify(x.features) !== JSON.stringify(c.features))).slice(0, 4);
 
   return (
@@ -89,22 +99,16 @@ export function WordPanel(p: Props) {
       </div>
 
       {/* Level 1 — immediate meaning */}
-      <div className="card__surface dv">{token.surface_original}</div>
-      {showTranslit && <div className="card__translit">{settings.translitStyle === 'practical' ? practical(pron.pronunciation) : pron.pronunciation}{pron.confidence < 0.8 && <span title="pronunciation less certain"> ?</span>}</div>}
+      <div className="card__surface ru">{stressIdx >= 0 ? withAcute(token.surface_normalized, stressIdx) : token.surface_original}</div>
+      {showTranslit && <div className="card__translit">{pron.translit}{pron.confidence < 0.8 && <span title="pronunciation less certain"> ?</span>}</div>}
       {glossCtx && <div className="card__gloss card__gloss--ctx">{glossCtx}</div>}
       <div className="card__gloss">{cand.gloss}</div>
-      <div className="card__line"><span className="k">lemma</span><span className="dv">{cand.lemma}</span><span className="soft">· {cand.entry?.gloss ?? cand.gloss}</span></div>
+      <div className="card__line"><span className="k">lemma</span><span className="ru">{accentedLemma}</span></div>
       <div className="card__line"><span className="k">form</span><span>{POS_LABEL[cand.pos] ?? cand.pos}{feats.length ? ' · ' + feats.join(' · ') : ''}</span></div>
-      {isGuess && <p className="card__err">Not in the lexicon — the reading above is a guess from the ending ({confidenceLabel(cand.confidence)}).</p>}
+      {isGuess && <p className="card__err">Not in the dictionary — the reading above is a pattern guess ({confidenceLabel(cand.confidence)}).</p>}
+      {cand.variant && <p className="muted-note">A spelling variant (ё/е, pre-reform orthography) of the same word.</p>}
       {at.ambiguous && !isGuess && <p className="muted-note">Two analyses are possible; see alternatives below.</p>}
-      {at.notes.filter((n) => /oblique|agrees|construction|vocative|read as|plural|fused/.test(n)).slice(0, 2).map((n, i) => <div key={i} className="card__why">{n}</div>)}
-
-      {beginner && (
-        <div className="card__section">
-          <span className="label">Script</span>
-          <AksharaStrip word={token.surface_original} known={known} selected={akOpen} onSelect={setAkOpen} />
-        </div>
-      )}
+      {at.notes.slice(0, 2).map((n, i) => <div key={i} className="card__why">{n}</div>)}
 
       <StatusPicker lexemeKey={c.key} form={token.key} status={status} onStatus={p.onStatus} />
 
@@ -115,7 +119,7 @@ export function WordPanel(p: Props) {
             {cand.morphemes.map((m, i) => (
               <span key={i} style={{ display: 'contents' }}>
                 {i > 0 && <span className="morph__plus">+</span>}
-                <span className={`morph morph--${m.role}`}><span className="morph__form">{m.text || '∅'}</span><span className="morph__kind">{m.role}</span><span className="morph__gloss">{m.gloss}</span></span>
+                <span className={`morph morph--${m.role}`}><span className="morph__form ru">{m.text || '∅'}</span><span className="morph__kind">{m.role}</span><span className="morph__gloss">{m.gloss}</span></span>
               </span>
             ))}
           </div>
@@ -125,21 +129,22 @@ export function WordPanel(p: Props) {
               {at.notes.map((n, i) => <p key={i} className="card__text">{n}</p>)}
             </div>
           )}
+          {cand.partner && (
+            <p className="card__text"><b>Aspect partner:</b> <Link className="ru" to={`/word/${encodeURIComponent(cand.partner)}`}>{cand.partner.split(':')[1]}</Link></p>
+          )}
+          <div className="card__section">
+            <span className="label">Letters</span>
+            <LetterStrip word={token.surface_original} stressIndex={stressIdx} known={known} selected={letterOpen} onSelect={setLetterOpen} />
+          </div>
           {cons.length > 0 && (
             <div className="card__section">
               <span className="label">Part of a construction</span>
               {cons.map((x, i) => (
                 <button key={i} className="cons cons--verb" style={{ display: 'block', width: '100%', textAlign: 'left' }} onClick={() => p.onHighlightConstruction(x)}>
-                  <div className="cons__head"><span className="dv">{x.tokens.map((k) => analysis.tokens[k]!.text).join(' ')}</span><span className="g">{x.gloss}</span></div>
+                  <div className="cons__head"><span className="ru">{x.tokens.map((k) => analysis.tokens[k]!.text).join(' ')}</span><span className="g">{x.gloss}</span></div>
                   <div className="cons__label">{x.label}{x.roles[at.i] ? ` · this word: ${x.roles[at.i]}` : ''}</div>
                 </button>
               ))}
-            </div>
-          )}
-          {!beginner && (
-            <div className="card__section">
-              <span className="label">Script</span>
-              <AksharaStrip word={token.surface_original} known={known} selected={akOpen} onSelect={setAkOpen} />
             </div>
           )}
           {alternatives.length > 0 && (
@@ -148,7 +153,7 @@ export function WordPanel(p: Props) {
               <div className="chips">
                 {alternatives.map((x, i) => (
                   <button key={i} className={`chip chip--btn${at.candidates.indexOf(x) === pick ? ' chip--on' : ''}`} onClick={() => setPick(at.candidates.indexOf(x) === pick ? at.chosen : at.candidates.indexOf(x))}>
-                    <span className="dv">{x.lemma}</span> {POS_LABEL[x.pos] ?? x.pos} · {featureWords(x.features, x.pos).join(' ') || x.gloss}
+                    <span className="ru">{x.lemma}</span> {POS_LABEL[x.pos] ?? x.pos} · {featureWords(x.features, x.pos).join(' ') || x.gloss}
                   </button>
                 ))}
               </div>
@@ -158,28 +163,25 @@ export function WordPanel(p: Props) {
         </div>
       )}
 
-      <Reveal label="Deeper" hint="paradigm · pronunciation · history" open={level >= 3} onToggle={() => setLevel(level >= 3 ? 2 : 3)} />
+      <Reveal label="Deeper" hint="paradigm · pronunciation · frequency" open={level >= 3} onToggle={() => setLevel(level >= 3 ? 2 : 3)} />
       {level >= 3 && (
         <div>
           <div className="encoding">
-            <span className="k">lemma</span><span className="t"><span className="dv">{cand.lemma}</span></span>
+            <span className="k">lemma</span><span className="t"><span className="ru">{accentedLemma}</span></span>
             <span className="k">part of speech</span><span className="t">{POS_LABEL[cand.pos] ?? cand.pos}</span>
-            {cand.features.gender && <><span className="k">gender</span><span className="t">{cand.features.gender === 'm' ? 'masculine' : 'feminine'}</span></>}
+            {cand.features.gender && <><span className="k">gender</span><span className="t">{cand.features.gender === 'm' ? 'masculine' : cand.features.gender === 'f' ? 'feminine' : cand.features.gender === 'n' ? 'neuter' : 'common'}</span></>}
             {cand.features.number && <><span className="k">number</span><span className="t">{cand.features.number === 'sg' ? 'singular' : 'plural'}</span></>}
-            {cand.features.case && <><span className="k">case</span><span className="t">{cand.features.case}</span></>}
+            {cand.features.case && <><span className="k">case</span><span className="t">{CASE_LABEL[cand.features.case] ?? cand.features.case}</span></>}
+            {cand.features.aspect && <><span className="k">aspect</span><span className="t">{cand.features.aspect}</span></>}
             {cand.features.verb_form && <><span className="k">verb form</span><span className="t">{cand.features.verb_form.replace(/-/g, ' ')}</span></>}
             {cand.features.paradigm && <><span className="k">paradigm</span><span className="t">{cand.features.paradigm}</span></>}
-            {cand.entry?.cls && <><span className="k">class</span><span className="t">{NOUN_CLASS_LABEL[cand.entry.cls]}</span></>}
-            {cand.entry?.trans !== undefined && <><span className="k">valency</span><span className="t">{cand.entry.trans ? 'transitive' : 'intransitive'}{cand.entry.ne ? ` · ने: ${cand.entry.ne}` : ''}</span></>}
-            {cand.entry?.inflects !== undefined && cand.pos === 'adjective' && <><span className="k">inflection</span><span className="t">{cand.entry.inflects ? 'inflecting (-ā / -e / -ī)' : 'indeclinable'}</span></>}
-            <span className="k">pronunciation</span><span className="t">{pron.transliteration}{pron.pronunciation !== pron.transliteration ? ` → ${pron.pronunciation}` : ''} <span className="faint">({confidenceLabel(pron.confidence)}{pron.source === 'lexicon' ? ', hand-checked' : ''})</span></span>
-            {cand.entry?.ety && <><span className="k">origin</span><span className="t">{cand.entry.ety}</span></>}
-            {cand.entry?.senses && <><span className="k">senses</span><span className="t">{cand.entry.senses.join('; ')}</span></>}
-            {cand.entry?.notes && <><span className="k">notes</span><span className="t">{cand.entry.notes}</span></>}
+            <span className="k">pronunciation</span><span className="t">{pron.ipa} → {pron.translit} <span className="faint">({confidenceLabel(pron.confidence)})</span></span>
+            {entry?.senses && entry.senses.length > 0 && <><span className="k">senses</span><span className="t">{entry.senses.join('; ')}</span></>}
+            {entry?.rank && <><span className="k">frequency</span><span className="t">#{entry.rank} of 50,000</span></>}
             {stats && <><span className="k">encounters</span><span className="t">{stats.encounters} read · {stats.lookups} looked up{stats.forms.length ? ` · forms: ${stats.forms.slice(0, 6).map((f) => `${f.form} ×${f.count}`).join(', ')}` : ''}</span></>}
           </div>
           {pron.notes.length > 0 && <p className="muted-note">{pron.notes.join(' · ')}</p>}
-          <Paradigm cand={cand} surface={token.surface_normalized} />
+          {entry?.paradigm && <Paradigm paradigm={entry.paradigm} currentForm={token.surface_normalized} />}
           <div className="card__actions">
             <Link className="btn btn--small" to={`/word/${encodeURIComponent(c.key)}`}>Lexeme page</Link>
             <button className="btn btn--small" onClick={() => setCorrecting(!correcting)}>{correcting ? 'Cancel' : 'Correct'}</button>

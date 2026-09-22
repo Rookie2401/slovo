@@ -2,8 +2,8 @@ import { memo, useMemo, type ReactNode } from 'react';
 import type { KnownWord, Paragraph, Sentence, Token } from '../database/types';
 import type { ChapterAnalysis } from '../database/analysis';
 import { decodability } from '../alphabet/decodability';
-import { segmentAksharas, normalize, graphemesOf } from '../tokenizer/devanagari';
-import { pronounce, practical } from '../pronunciation/translit';
+import { COMBINING_ACUTE } from '../tokenizer/cyrillic';
+import { pronounce } from '../pronunciation';
 import type { Settings } from '../database/settings';
 import { chosen } from '../morphology/sentence';
 
@@ -27,32 +27,49 @@ interface Props {
   registerPara: (el: HTMLElement | null, p: Paragraph) => void;
 }
 
+/** Insert a combining acute after the stressed letter of `text` (index into the same string). */
+function withStressMark(text: string, stressIndex: number): string {
+  if (stressIndex < 0 || stressIndex >= text.length) return text;
+  return text.slice(0, stressIndex + 1) + COMBINING_ACUTE + text.slice(stressIndex + 1);
+}
+
+/** ё folded to/from е per the yoDisplay setting; 'always' relies on an accented reference
+ * (e.g. the dictionary morpheme text) that still carries ё, spliced onto the source spelling. */
+function applyYoDisplay(text: string, mode: Settings['yoDisplay'], accentedReference?: string): string {
+  if (mode === 'never') return text.replace(/ё/g, 'е').replace(/Ё/g, 'Е');
+  if (mode === 'always' && accentedReference && accentedReference.length === text.length) {
+    let out = '';
+    for (let i = 0; i < text.length; i++) {
+      const ref = accentedReference[i]!;
+      const ch = text[i]!;
+      out += (ref === 'ё' && ch.toLowerCase() === 'е') ? (ch === 'Е' ? 'Ё' : 'ё') : ch;
+    }
+    return out;
+  }
+  return text;
+}
+
 const translitCache = new Map<string, string>();
-function translitOf(word: string, style: Settings['translitStyle']): string {
-  const k = style + ':' + word;
+function translitOf(word: string, stressIndex: number): string {
+  const k = stressIndex + ':' + word;
   const hit = translitCache.get(k);
   if (hit) return hit;
-  const p = pronounce(word);
-  const v = style === 'practical' ? practical(p.pronunciation) : p.pronunciation;
+  const v = pronounce(word, stressIndex).translit;
   translitCache.set(k, v);
   return v;
 }
 
-function WordSpan({ t, cls, showTranslit, translitStyle, highlightUnknown, known, onClick }: { t: Token; cls: string; showTranslit: boolean; translitStyle: Settings['translitStyle']; highlightUnknown: boolean; known: Set<string>; onClick: () => void }) {
-  let inner: ReactNode = t.surface_original;
+function WordSpan({ t, cls, display, showTranslit, translitText, highlightUnknown, known, onClick }: { t: Token; cls: string; display: string; showTranslit: boolean; translitText: string; highlightUnknown: boolean; known: Set<string>; onClick: () => void }) {
+  let inner: ReactNode = display;
   if (highlightUnknown && known.size > 0) {
     const d = decodability(t.surface_normalized, known);
     if (d.unknown.length) {
-      const unknown = new Set(d.unknown);
-      inner = segmentAksharas(t.surface_original).map((a, i) => {
-        const uses = graphemesOf(normalize(a.text));
-        const bad = uses.some((u) => unknown.has(u.symbol) || unknown.has(u.symbol.normalize('NFC')));
-        return bad ? <span key={i} className="g-unknown">{a.text}</span> : a.text;
-      });
+      const unknown = new Set(d.unknown.map((s) => s.toLowerCase()));
+      inner = Array.from(display).map((ch, i) => (unknown.has(ch.toLowerCase()) ? <span key={i} className="g-unknown">{ch}</span> : ch));
     }
   }
   const body = showTranslit ? (
-    <ruby className="rb">{inner}<rt>{translitOf(t.surface_normalized, translitStyle)}</rt></ruby>
+    <ruby className="rb">{inner}<rt>{translitText}</rt></ruby>
   ) : inner;
   return (
     <span className={cls} data-token={t.id} role="button" tabIndex={0} onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onClick(); } }}>
@@ -87,8 +104,10 @@ function ParagraphView({ p, sentences, analysis, settings, known, statuses, sele
     return out;
   };
   const constructionSet = new Set(selection.constructionTokens ?? []);
-  const showTranslitAll = settings.translit === 'always';
-  const showTranslitUnknown = settings.translit === 'unknown';
+  const showTranslitAll = settings.translitMode === 'always';
+  const showTranslitUnknown = settings.translitMode === 'unknown';
+  const showStressAll = settings.stressMarks === 'always';
+  const showStressUnknown = settings.stressMarks === 'unknown';
   for (const s of sentences) {
     const a = analysis.sentences.get(s.id!);
     const toks = analysis.tokensBySentence.get(s.id!) ?? [];
@@ -107,9 +126,13 @@ function ParagraphView({ p, sentences, analysis, settings, known, statuses, sele
         if (selection.tokenId === t.id) cls += ' sel';
         else if (constructionSet.has(t.id!)) cls += ' sel-cons';
         if (isEm) cls += ' em';
-        const unknownScript = settings.highlightUnknownGraphemes || showTranslitUnknown ? decodability(t.surface_normalized, known).unknown.length > 0 : false;
+        const unknownScript = settings.highlightUnknownGraphemes || showTranslitUnknown || showStressUnknown ? decodability(t.surface_normalized, known).unknown.length > 0 : false;
+        const stressIdx = c && c.features.stress != null && c.features.stress >= 0 ? c.features.stress : (t.source_stress ?? -1);
+        let display = applyYoDisplay(t.surface_original, settings.yoDisplay, c?.morphemes.map((m) => m.text).join(''));
+        if ((showStressAll || (showStressUnknown && unknownScript)) && stressIdx >= 0) display = withStressMark(display, stressIdx);
         const showT = showTranslitAll || (showTranslitUnknown && unknownScript);
-        sentPieces.push(<WordSpan key={t.id} t={t} cls={cls} showTranslit={showT} translitStyle={settings.translitStyle} highlightUnknown={settings.highlightUnknownGraphemes} known={known} onClick={() => onTapWord(t, s)} />);
+        const translitText = showT ? translitOf(t.surface_normalized, stressIdx) : '';
+        sentPieces.push(<WordSpan key={t.id} t={t} cls={cls} display={display} showTranslit={showT} translitText={translitText} highlightUnknown={settings.highlightUnknownGraphemes} known={known} onClick={() => onTapWord(t, s)} />);
       } else {
         sentPieces.push(<span key={t.id} className={t.kind === 'punct' ? 'punct' : undefined} onClick={() => onTapSentence(s)}>{wrapEm(t.surface_original, t.start)}</span>);
       }
@@ -131,10 +154,10 @@ function ParagraphView({ p, sentences, analysis, settings, known, statuses, sele
 
 export const Prose = memo(function Prose(props: Props) {
   const { paragraphs, sentencesByPara, settings } = props;
-  const translitOn = settings.translit === 'always' || settings.translit === 'unknown';
+  const translitOn = settings.translitMode === 'always' || settings.translitMode === 'unknown';
   const items = useMemo(() => paragraphs.map((p, i) => ({ p, i, sents: sentencesByPara.get(p.id!) ?? [] })), [paragraphs, sentencesByPara]);
   return (
-    <div className={`reader__prose${translitOn ? ' translit-on' : ''}`} lang="hi">
+    <div className={`reader__prose${translitOn ? ' translit-on' : ''}`} lang="ru">
       {items.map(({ p, i, sents }) => (
         <ParagraphView key={p.id} {...props} p={p} sentences={sents} index={i} />
       ))}

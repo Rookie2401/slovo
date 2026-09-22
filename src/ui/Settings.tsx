@@ -2,19 +2,18 @@ import { useEffect, useState } from 'react';
 import { db, ENGINE_VERSION } from '../database/db';
 import { useSettings } from '../database/settings';
 import { BackLink, Topbar } from './components';
-import { ENGINE_RULES_VERSION } from '../syntax';
-import { LEXICON } from '../lexicon';
-import { audioAvailable, hindiVoice } from '../audio/speech';
+import { ENGINE_RULES_VERSION } from '../morphology/analyze';
+import { audioAvailable, russianVoice } from '../audio/speech';
 import { revokeCorrection } from '../database/analysis';
 import type { UserCorrection } from '../database/types';
 
 export function SettingsScreen() {
   const [s, set] = useSettings();
-  const [counts, setCounts] = useState<{ books: number; tokens: number; analyses: number; corrections: number; versions: number } | null>(null);
+  const [counts, setCounts] = useState<{ books: number; tokens: number; lexemes: number; analyses: number; corrections: number; versions: number } | null>(null);
   const [corrections, setCorrections] = useState<UserCorrection[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
   const load = async () => {
-    setCounts({ books: await db.books.count(), tokens: await db.tokens.count(), analyses: await db.token_analyses.count(), corrections: await db.user_corrections.filter((c) => c.active).count(), versions: await db.analysis_versions.count() });
+    setCounts({ books: await db.books.count(), tokens: await db.tokens.count(), lexemes: await db.lexemes.count(), analyses: await db.token_analyses.count(), corrections: await db.user_corrections.filter((c) => c.active).count(), versions: await db.analysis_versions.count() });
     setCorrections(await db.user_corrections.filter((c) => c.active).reverse().sortBy('created_at'));
   };
   useEffect(() => {
@@ -34,7 +33,7 @@ export function SettingsScreen() {
     const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `paath-progress-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `slovo-progress-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   };
@@ -69,26 +68,27 @@ export function SettingsScreen() {
         <h2 className="label">Reading</h2>
         <div className="field field--row"><label>Theme</label><div className="segmented">{(['auto', 'light', 'dark'] as const).map((t) => <button key={t} aria-pressed={s.theme === t} onClick={() => set({ theme: t })}>{t}</button>)}</div></div>
         <div className="field field--row"><label htmlFor="st-size">Text size ({s.fontSize}px)</label><input id="st-size" type="range" min={16} max={40} value={s.fontSize} onChange={(e) => set({ fontSize: Number(e.target.value) })} /></div>
-        <div className="field field--row"><label>Hindi face</label><div className="segmented">{(['tiro', 'noto', 'system'] as const).map((f) => <button key={f} aria-pressed={s.hindiFont === f} onClick={() => set({ hindiFont: f })}>{f === 'tiro' ? 'Tiro Devanagari' : f === 'noto' ? 'Noto Sans' : 'System'}</button>)}</div></div>
+        <div className="field field--row"><label>Russian face</label><div className="segmented">{(['ptserif', 'system'] as const).map((f) => <button key={f} aria-pressed={s.russianFont === f} onClick={() => set({ russianFont: f })}>{f === 'ptserif' ? 'PT Serif' : 'System'}</button>)}</div></div>
 
         <h2 className="label" style={{ marginTop: '1.5rem' }}>Assistance</h2>
-        <div className="field"><label>Transliteration under words</label><div className="segmented">{(['always', 'tap', 'unknown', 'never'] as const).map((t) => <button key={t} aria-pressed={s.translit === t} onClick={() => set({ translit: t })}>{t === 'unknown' ? 'only unknown script' : t === 'tap' ? 'show on tap' : t === 'always' ? 'always show' : 'never show'}</button>)}</div><p className="muted-note">Scaffolding only: as symbols are mastered, transliteration disappears from them. Aim for “never”.</p></div>
-        <div className="field field--row"><label>Transliteration style</label><div className="segmented"><button aria-pressed={s.translitStyle === 'iast'} onClick={() => set({ translitStyle: 'iast' })}>scholarly (ā ṭ ś)</button><button aria-pressed={s.translitStyle === 'practical'} onClick={() => set({ translitStyle: 'practical' })}>practical (aa t sh)</button></div></div>
+        <div className="field"><label>Stress marks over words</label><div className="segmented">{(['always', 'tap', 'unknown', 'never'] as const).map((t) => <button key={t} aria-pressed={s.stressMarks === t} onClick={() => set({ stressMarks: t })}>{t === 'unknown' ? 'only unfamiliar' : t === 'tap' ? 'show on tap' : t === 'always' ? 'always show' : 'never show'}</button>)}</div><p className="muted-note">Stress is only ever shown when it is certain — from the source text or a dictionary hit. A guessed form never gets a stress mark.</p></div>
+        <div className="field"><label>Ё in the text</label><div className="segmented"><button aria-pressed={s.yoDisplay === 'source'} onClick={() => set({ yoDisplay: 'source' })}>as printed</button><button aria-pressed={s.yoDisplay === 'always'} onClick={() => set({ yoDisplay: 'always' })}>always ё</button><button aria-pressed={s.yoDisplay === 'never'} onClick={() => set({ yoDisplay: 'never' })}>always е</button></div></div>
+        <div className="field"><label>Transcription under words</label><div className="segmented">{(['always', 'tap', 'unknown', 'never'] as const).map((t) => <button key={t} aria-pressed={s.translitMode === t} onClick={() => set({ translitMode: t })}>{t === 'unknown' ? 'only unfamiliar' : t === 'tap' ? 'show on tap' : t === 'always' ? 'always show' : 'never show'}</button>)}</div></div>
         <div className="field field--row"><label htmlFor="st-hl">Tint letters not yet learned</label><input id="st-hl" type="checkbox" checked={s.highlightUnknownGraphemes} onChange={(e) => set({ highlightUnknownGraphemes: e.target.checked })} /></div>
         <div className="field field--row"><label htmlFor="st-marks">Vocabulary marks in the text</label><input id="st-marks" type="checkbox" checked={s.showMarks} onChange={(e) => set({ showMarks: e.target.checked })} /></div>
-        <div className="field"><label>English word glosses in the sentence view</label><div className="segmented">{(['off', 'tap', 'always'] as const).map((t) => <button key={t} aria-pressed={s.englishAssist === t} onClick={() => set({ englishAssist: t })}>{t}</button>)}</div></div>
-        <div className="field"><label>Grammar explanations</label><div className="segmented"><button aria-pressed={s.explainLanguage === 'en'} onClick={() => set({ explainLanguage: 'en' })}>English</button><button aria-pressed={s.explainLanguage === 'hi-simple'} onClick={() => set({ explainLanguage: 'hi-simple' })}>also in simple Hindi</button></div></div>
+        <div className="field field--row"><label htmlFor="st-eng">English parallel pane at the end of each chapter</label><input id="st-eng" type="checkbox" checked={s.englishParallel} onChange={(e) => set({ englishParallel: e.target.checked })} /></div>
+        <div className="field"><label>Grammar explanations</label><div className="segmented"><button aria-pressed={s.explainLanguage === 'en'} onClick={() => set({ explainLanguage: 'en' })}>English</button><button aria-pressed={s.explainLanguage === 'ru-simple'} onClick={() => set({ explainLanguage: 'ru-simple' })}>also in simple Russian</button></div></div>
 
         <h2 className="label" style={{ marginTop: '1.5rem' }}>Vocabulary</h2>
         <div className="field field--row"><label htmlFor="st-auto">Automatically “known” after N unaided encounters (0 = never)</label><input id="st-auto" type="number" min={0} max={30} value={s.autoKnownAfter} onChange={(e) => set({ autoKnownAfter: Number(e.target.value) })} style={{ width: '5rem' }} /></div>
         <div className="field field--row"><label htmlFor="st-look">A tap counts as a lookup (moves known words back to “recognizing”)</label><input id="st-look" type="checkbox" checked={s.lookupMarksRecognized} onChange={(e) => set({ lookupMarksRecognized: e.target.checked })} /></div>
 
         <h2 className="label" style={{ marginTop: '1.5rem' }}>Audio</h2>
-        <p className="card__text">{audioAvailable() ? `Hindi voice available: ${hindiVoice()?.name}. Synthesized speech is a convenience, not a pronunciation authority.` : 'No Hindi voice is installed in this browser. On Windows, add the Hindi language pack; on Android/iOS, install the Hindi text-to-speech voice.'}</p>
+        <p className="card__text">{audioAvailable() ? `Russian voice available: ${russianVoice()?.name}. Synthesized speech is a convenience, not a pronunciation authority.` : 'No Russian voice is installed in this browser. On Windows, add the Russian language pack; on Android/iOS, install the Russian text-to-speech voice.'}</p>
         <div className="field field--row"><label htmlFor="st-rate">Speech rate</label><input id="st-rate" type="range" min={0.5} max={1.3} step={0.05} value={s.speechRate} onChange={(e) => set({ speechRate: Number(e.target.value) })} /></div>
 
         <h2 className="label" style={{ marginTop: '1.5rem' }}>Language model (optional)</h2>
-        <p className="card__text">Add a Claude API key to get natural translations and phrased explanations. The model receives the deterministic analysis and may only explain it; it never decides morphology, gender or pronunciation. The key stays in this browser.</p>
+        <p className="card__text">Add a Claude API key to get natural translations and phrased explanations. The model receives the deterministic analysis and may only explain it; it never decides morphology, aspect or stress. The key stays in this browser and is used only for a direct request from your browser to Anthropic.</p>
         <div className="field"><label htmlFor="st-key">API key</label><input id="st-key" type="password" value={s.claudeKey} onChange={(e) => set({ claudeKey: e.target.value })} autoComplete="off" placeholder="sk-ant-…" /></div>
         <div className="field"><label htmlFor="st-model">Model</label><input id="st-model" type="text" value={s.claudeModel} onChange={(e) => set({ claudeModel: e.target.value })} /></div>
 
@@ -97,21 +97,25 @@ export function SettingsScreen() {
         <ul className="list">
           {corrections.slice(0, 30).map((c) => (
             <li key={c.id} className="list__row">
-              <span>{c.target_type} #{String(c.target_id)} · <span className="dv">{String((c.payload as { lemma?: string }).lemma ?? (c.payload as { natural?: string }).natural ?? '')}</span>{c.note ? ` — ${c.note}` : ''}</span>
+              <span>{c.target_type} #{String(c.target_id)} · <span className="ru">{String((c.payload as { lemma?: string }).lemma ?? (c.payload as { natural?: string }).natural ?? '')}</span>{c.note ? ` — ${c.note}` : ''}</span>
               <button className="textlink" style={{ marginLeft: 'auto' }} onClick={() => void revokeCorrection(c.id!).then(load)}>revoke</button>
             </li>
           ))}
         </ul>
 
         <h2 className="label" style={{ marginTop: '1.5rem' }}>Data</h2>
-        {counts && <p className="card__text">{counts.books} book(s) · {counts.tokens.toLocaleString()} tokens · {counts.analyses.toLocaleString()} stored analyses in {counts.versions} version(s) · {counts.corrections} active corrections. Engine {ENGINE_VERSION}, rules v{ENGINE_RULES_VERSION}, lexicon {LEXICON.length} entries.</p>}
+        {counts && <p className="card__text">{counts.books} book(s) · {counts.tokens.toLocaleString()} tokens · {counts.lexemes.toLocaleString()} lexemes · {counts.analyses.toLocaleString()} stored analyses in {counts.versions} version(s) · {counts.corrections} active corrections. Engine {ENGINE_VERSION}, rules v{ENGINE_RULES_VERSION}.</p>}
         <div className="card__actions">
           <button className="btn btn--small" onClick={() => void exportData()}>Export progress (JSON)</button>
           <label className="btn btn--small">Import progress<input type="file" accept="application/json" style={{ display: 'none' }} onChange={(e) => void importData(e.target.files?.[0])} /></label>
           <button className="btn btn--small btn--danger" onClick={() => { if (confirm('Reset the first-run questionnaire?')) set({ onboarded: false }); }}>Redo first-run setup</button>
         </div>
         {msg && <p className="muted-note">{msg}</p>}
-        <p className="home__about">Sample text: Indian Revised Version Hindi Bible, © 2017–2019 Bridge Connectivity Solutions, CC BY-SA 4.0 (ebible.org). Fonts: Tiro Devanagari Hindi (OFL), Noto Sans Devanagari (OFL), EB Garamond (OFL).</p>
+
+        <h2 className="label" style={{ marginTop: '1.5rem' }}>Sources &amp; licences</h2>
+        <p className="home__about">
+          Dictionary: OpenRussian, CC BY-SA 4.0. Frequency list: hermitdave/FrequencyWords, CC BY-SA 4.0. Russian texts: lib.ru and ru.wikisource.org (public domain). English parallels: Project Gutenberg (public domain in the US). Fonts: PT Serif (OFL), EB Garamond (OFL), Noto Sans (OFL).
+        </p>
       </main>
     </div>
   );

@@ -103,11 +103,12 @@ export function confidenceLabel(c: number): string {
 
 export const SOURCE_LABEL: Record<string, string> = {
   manual: 'hand-verified table',
-  dictionary: 'lexicon',
+  dictionary: 'dictionary',
   rule: 'grammar rule',
   morphological_engine: 'paradigm engine',
   syntax_engine: 'syntax engine',
   statistical: 'ending pattern (guess)',
+  source_text: 'printed in the source',
   ai: 'language model',
   user_correction: 'your correction',
 };

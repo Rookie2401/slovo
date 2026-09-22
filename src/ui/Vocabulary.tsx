@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { KnownWord, LearningStatus } from '../database/types';
-import { lexemeEntry } from '../lexicon';
+import { lexemeSync } from '../dictionary';
 import { allKnownWords, onVocabChange, STATUS_LABEL, STATUS_ORDER } from '../vocabulary';
 import { BackLink, Topbar } from './components';
 
@@ -16,7 +16,7 @@ export function VocabularyScreen() {
   }, []);
   const counts = new Map<string, number>();
   for (const r of rows) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
-  const shown = rows.filter((r) => (filter === 'all' || r.status === filter) && (!q || r.lexeme_key.includes(q) || (lexemeEntry(r.lexeme_key)?.gloss ?? '').toLowerCase().includes(q.toLowerCase())));
+  const shown = rows.filter((r) => (filter === 'all' || r.status === filter) && (!q || r.lexeme_key.includes(q) || (lexemeSync(r.lexeme_key)?.gloss ?? '').toLowerCase().includes(q.toLowerCase())));
   return (
     <div className="shell route-fade">
       <Topbar title="Vocabulary" left={<BackLink />} />
@@ -33,11 +33,12 @@ export function VocabularyScreen() {
         <p className="muted-note">Tracked by lexeme (dictionary word). Encounters count when you scroll past a paragraph; lookups when you tap. The list never interferes with reading.</p>
         <div>
           {shown.slice(0, 400).map((r) => {
-            const e = lexemeEntry(r.lexeme_key);
-            const [lemma, pos] = r.lexeme_key.replace(/^\?/, '').split('|');
+            const e = lexemeSync(r.lexeme_key);
+            const bare = r.lexeme_key.replace(/^\?/, '');
+            const [pos, lemma] = bare.includes(':') ? bare.split(':') : [undefined, bare];
             return (
               <Link key={r.lexeme_key} className="vocab__row" to={`/word/${encodeURIComponent(r.lexeme_key)}`}>
-                <span className="dv">{lemma}</span>
+                <span className="ru">{lemma}</span>
                 <span className="g">{e?.gloss ?? pos}</span>
                 <span className="m">{STATUS_LABEL[r.status]} · {r.encounters}×{r.lookups ? ` · ${r.lookups} lookups` : ''}</span>
               </Link>

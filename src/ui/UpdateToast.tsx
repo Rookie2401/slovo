@@ -21,7 +21,7 @@ export function UpdateToast() {
   if (!update) return null;
   return (
     <div className="update-toast" role="status">
-      <span>A new version of पाठ is ready.</span>
+      <span>A new version of Слово is ready.</span>
       <button className="btn btn--small btn--primary" onClick={() => void update()}>Reload</button>
       <button className="btn btn--small btn--quiet" onClick={() => setUpdate(null)}>Later</button>
     </div>

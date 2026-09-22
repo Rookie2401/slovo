@@ -1,7 +1,7 @@
 import type { EmphasisRange, ParagraphKind } from '../database/types';
 import type { ImportedBook, ImportedChapter, ImportedParagraph } from './types';
 import { ImportRefused } from './types';
-import { hasDevanagari } from '../tokenizer/devanagari';
+import { hasCyrillic } from '../tokenizer/cyrillic';
 
 const BLOCK_TAGS = new Set(['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'pre', 'section', 'article', 'header', 'footer', 'main', 'body', 'ul', 'ol', 'table', 'tr', 'td', 'th', 'dd', 'dt', 'dl', 'figure', 'figcaption', 'aside', 'nav', 'hr', 'br', 'center']);
 const SKIP_TAGS = new Set(['script', 'style', 'head', 'title', 'meta', 'link', 'noscript', 'template', 'svg', 'img', 'sup']);
@@ -17,10 +17,11 @@ export interface Block {
 function classKind(el: Element): ParagraphKind | null {
   const cls = (el.getAttribute('class') ?? '').toLowerCase();
   if (!cls) return null;
-  if (/(^|\s)(mt\d?|title|chapter-?title|chaptertitle|heading|h\d?|s\d?|ms\d?|psalmlabel)(\s|$)/.test(cls)) return 'heading';
+  if (/(^|\s)(mt\d?|title|chapter-?title|chaptertitle|heading|h\d?|s\d?|ms\d?)(\s|$)/.test(cls)) return 'heading';
   if (/(^|\s)(q\d?|poetry|verse)(\s|$)/.test(cls)) return 'verse';
   if (/(^|\s)(blockquote|quote|epigraph)(\s|$)/.test(cls)) return 'quote';
   if (/(^|\s)(footnote|note|f|x|xt)(\s|$)/.test(cls)) return 'note';
+  if (/(^|\s)(letter)(\s|$)/.test(cls)) return 'letter';
   return null;
 }
 
@@ -42,7 +43,7 @@ function isEmphasis(el: Element): 'em' | 'strong' | null {
 
 /** Whitespace handling follows HTML rendering: runs collapse to one space. */
 function collapse(s: string): string {
-  return s.replace(/[\s ﻿]+/g, ' ');
+  return s.replace(/[\s ﻿]+/g, ' ');
 }
 
 /**
@@ -164,7 +165,7 @@ const MIN_CHAPTER_WORDS = 40;
 
 function countWords(paras: ImportedParagraph[]): number {
   let n = 0;
-  for (const p of paras) n += p.text.split(/\s+/).filter((w) => hasDevanagari(w)).length;
+  for (const p of paras) n += p.text.split(/\s+/).filter((w) => hasCyrillic(w)).length;
   return n;
 }
 
@@ -235,6 +236,6 @@ export function importHtml(html: string, opts: { title?: string; sourceName?: st
   const title = opts.title || docTitle || opts.sourceName || 'Untitled';
   const chapters = blocksToChapters(blocks, title, opts.sourceName);
   const words = chapters.reduce((n, c) => n + countWords(c.paragraphs), 0);
-  if (words === 0) throw new ImportRefused('No Hindi text was found in this HTML document.', 'empty');
+  if (words === 0) throw new ImportRefused('No Russian text was found in this HTML document.', 'empty');
   return { title, source_format: 'html', source_name: opts.sourceName, chapters, warnings: [] };
 }

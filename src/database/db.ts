@@ -6,6 +6,7 @@ import type {
   AnalysisVersion,
   Book,
   Chapter,
+  CharacterRecord,
   Construction,
   ConstructionMember,
   Dependency,
@@ -14,6 +15,7 @@ import type {
   LearningState,
   Lexeme,
   Paragraph,
+  ParallelText,
   ReadingProgress,
   Sentence,
   Setting,
@@ -27,7 +29,7 @@ import type {
 /** Bump when the deterministic engines change so stale analyses regenerate. */
 export const ENGINE_VERSION = '0.1.0';
 
-export class HindiReaderDB extends Dexie {
+export class SlovoDB extends Dexie {
   books!: EntityTable<Book, 'id'>;
   chapters!: EntityTable<Chapter, 'id'>;
   paragraphs!: EntityTable<Paragraph, 'id'>;
@@ -40,6 +42,8 @@ export class HindiReaderDB extends Dexie {
   dependencies!: EntityTable<Dependency, 'id'>;
   translations!: EntityTable<Translation, 'id'>;
   explanations!: EntityTable<Explanation, 'id'>;
+  characters!: EntityTable<CharacterRecord, 'id'>;
+  parallel_texts!: EntityTable<ParallelText, 'id'>;
   word_encounters!: EntityTable<WordEncounter, 'id'>;
   known_words!: EntityTable<KnownWord, 'id'>;
   learning_state!: EntityTable<LearningState, 'id'>;
@@ -51,10 +55,10 @@ export class HindiReaderDB extends Dexie {
   analysis_sources!: EntityTable<AnalysisSourceRecord, 'id'>;
   settings!: EntityTable<Setting, 'key'>;
 
-  constructor(name = 'hindi-reader') {
+  constructor(name = 'slovo') {
     super(name);
     this.version(1).stores({
-      books: '++id, title, content_hash, created_at',
+      books: '++id, title, content_hash, created_at, slug',
       chapters: '++id, book_id, [book_id+index]',
       paragraphs: '++id, chapter_id, [chapter_id+index], book_id',
       sentences: '++id, paragraph_id, chapter_id, [chapter_id+index], book_id',
@@ -66,6 +70,8 @@ export class HindiReaderDB extends Dexie {
       dependencies: '++id, sentence_id, dependent_token_id, book_id, analysis_version',
       translations: '++id, sentence_id, book_id',
       explanations: '++id, [target_type+target_id], book_id',
+      characters: '++id, book_id, canonical',
+      parallel_texts: '++id, [book_id+chapter_id], book_id',
       word_encounters: '++id, lexeme_key, token_id, book_id, chapter_id, [lexeme_key+kind], at',
       known_words: '++id, &lexeme_key, status, updated_at',
       learning_state: '++id, &key',
@@ -80,13 +86,14 @@ export class HindiReaderDB extends Dexie {
   }
 }
 
-export const db = new HindiReaderDB();
+export const db = new SlovoDB();
 
 export const ANALYSIS_SOURCES: AnalysisSourceRecord[] = [
   { name: 'user_correction', description: 'A correction entered by the reader. Always wins.', priority: 100 },
-  { name: 'manual', description: 'Hand-verified data shipped with the app.', priority: 90 },
-  { name: 'rule', description: 'Deterministic linguistic rule.', priority: 80 },
-  { name: 'dictionary', description: 'Verified lexicon entry.', priority: 70 },
+  { name: 'manual', description: 'Hand-verified data shipped with the app (cast lists, closed-class tables).', priority: 90 },
+  { name: 'source_text', description: 'Taken directly from the printed source (stress marks in an Azbuka edition).', priority: 85 },
+  { name: 'rule', description: 'Deterministic linguistic rule (closed class, participle/gerund generation, syntax context).', priority: 80 },
+  { name: 'dictionary', description: 'Verified dictionary entry (OpenRussian).', priority: 70 },
   { name: 'morphological_engine', description: 'Paradigm-based morphological analysis.', priority: 60 },
   { name: 'syntax_engine', description: 'Sentence-level syntactic model.', priority: 50 },
   { name: 'statistical', description: 'Frequency-based guess.', priority: 30 },

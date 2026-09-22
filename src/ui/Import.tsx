@@ -59,8 +59,9 @@ export function ImportScreen() {
       const b = { ...preview, title: title || preview.title };
       const r = await storeBook(b, { appendTo: target === 'new' ? undefined : target, onProgress: (d, t) => setBusy(`Importing chapter ${d} of ${t}…`) });
       setBusy('Computing corpus frequencies…');
-      await bookFrequencies(r.bookId, { force: true });
-      nav(`/read/${r.bookId}/${r.chapterIds[0]}`);
+      await bookFrequencies(r.bookId, { force: true }).catch(() => {});
+      const first = await db.chapters.get(r.chapterIds[0]!);
+      nav(`/read/${r.bookId}/${first?.index ?? 0}`);
     } catch (e) {
       if (e instanceof ImportRefused) setRefused(e);
       else setErr(e instanceof Error ? e.message : String(e));
@@ -76,15 +77,15 @@ export function ImportScreen() {
       <Topbar title="Import" left={<BackLink />} />
       <main className="page page--narrow">
         <div className="note">
-          Import a Hindi text you can lawfully read: an ordinary <b>EPUB</b>, <b>HTML/XHTML</b>, <b>TXT</b> or a <b>JSON corpus</b>. For <i>पर्सी जैक्सन और देवताओं का युद्ध</i>, use a DRM-free copy you own. Protected files (.acsm, encrypted EPUBs) are refused — this reader never bypasses DRM. The text is stored only in this browser.
+          Import a Russian text you can lawfully read: an ordinary <b>EPUB</b>, <b>HTML/XHTML</b>, <b>TXT</b> or a <b>JSON corpus</b>. Protected files (.acsm, encrypted EPUBs) are refused — this reader never bypasses DRM. The text is stored only in this browser.
         </div>
         <div className="field">
           <label htmlFor="imp-file">Choose a file</label>
           <input id="imp-file" type="file" accept=".epub,.html,.htm,.xhtml,.txt,.json,.md,application/epub+zip,text/html,text/plain,application/json" onChange={(e) => void onFile(e.target.files?.[0])} />
         </div>
         <div className="field">
-          <label htmlFor="imp-text">…or paste text (blank lines separate paragraphs; a standalone line such as “अध्याय १” starts a chapter)</label>
-          <textarea id="imp-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="यहाँ हिंदी पाठ चिपकाएँ…" />
+          <label htmlFor="imp-text">…or paste text (blank lines separate paragraphs; a standalone line such as “Глава I” starts a chapter)</label>
+          <textarea id="imp-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste Russian text here…" />
           <div>
             <button className="btn btn--small" onClick={onPaste} disabled={!text.trim()}>Preview pasted text</button>
           </div>
@@ -113,7 +114,7 @@ export function ImportScreen() {
             {preview.warnings.map((w, i) => <p key={i} className="muted-note">{w}</p>)}
             <ul className="list" style={{ marginTop: '0.5rem' }}>
               {preview.chapters.slice(0, 40).map((c, i) => (
-                <li key={i} className="list__row"><span className="dv">{c.title}</span><span className="list__meta">{c.paragraphs.length} ¶</span></li>
+                <li key={i} className="list__row"><span className="ru">{c.title}</span><span className="list__meta">{c.paragraphs.length} ¶</span></li>
               ))}
               {preview.chapters.length > 40 && <li className="muted-note">… and {preview.chapters.length - 40} more</li>}
             </ul>

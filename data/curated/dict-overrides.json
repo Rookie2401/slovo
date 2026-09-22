@@ -1,0 +1,18 @@
+{
+  "noun:прислуга": {
+    "gender": "f",
+    "why": "feminine noun, -а, refers to the servants collectively (OpenRussian dump tags it m)"
+  },
+  "adjective:как": {
+    "drop": true,
+    "why": "conjunction/adverb (\"how\", \"as\", \"like\"), not an adjective; the row also carries no paradigm at all. Closed-class tables (package D) cover it."
+  },
+  "adjective:наверху": {
+    "drop": true,
+    "why": "adverb (\"upstairs\", \"above\") misfiled as an adjective; never functions as one and carries no paradigm."
+  },
+  "adjective:замужем": {
+    "drop": true,
+    "why": "frozen instrumental-case predicative (\"married\", said of a woman), not a declinable adjective; carries no paradigm."
+  }
+}

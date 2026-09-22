@@ -1,8 +1,14 @@
 import { db, ENGINE_VERSION } from './db';
-import type { Construction, Dependency, Sentence, Token, TokenAnalysis, UserCorrection } from './types';
-import type { Candidate } from '../lexicon';
+import type { CharacterRecord, Construction, Dependency, Sentence, Token, TokenAnalysis, UserCorrection } from './types';
+import type { Candidate } from '../morphology/candidate';
 import { chosen, type AnalyzedToken, type FoundConstruction, type SentenceAnalysis } from '../morphology/sentence';
-import { analyzeSentence, ENGINE_RULES_VERSION } from '../syntax';
+import { ENGINE_RULES_VERSION } from '../morphology/analyze';
+import type { AnalysisContext } from '../morphology/dictionary';
+import { analyzeSentence, type SentenceInput } from '../syntax';
+// TODO(integration): package B is adding preloadWork(slug) to src/dictionary/index.ts (a per-work
+// bundle of forms + core lexemes, so a chapter of a bundled library book no longer downloads every
+// shard its keys happen to land in). Not shipped yet — this import will resolve once it lands.
+import { preloadForms, preloadWork, readingsFor, lexemeSync } from '../dictionary';
 
 /**
  * Analysis persistence. Every chapter is analysed on first open and the
@@ -47,6 +53,17 @@ async function loadTokens(chapterId: number): Promise<Map<number, Token[]>> {
   return m;
 }
 
+/** Build the dictionary + names lookup handed to the syntax engine. */
+function buildContext(characters: CharacterRecord[]): AnalysisContext {
+  const byForm = new Map<string, { canonical: string; kind: string }>();
+  for (const c of characters) for (const f of c.forms) if (!byForm.has(f.form)) byForm.set(f.form, { canonical: c.canonical, kind: f.kind });
+  return {
+    readings: readingsFor,
+    lexeme: lexemeSync,
+    character: (form: string) => byForm.get(form.toLowerCase()),
+  };
+}
+
 function candidateToRow(t: Token, c: Candidate, rank: number, version: number, at: AnalyzedToken, chosenIdx: boolean): TokenAnalysis {
   return {
     token_id: t.id!, book_id: t.book_id, rank, lexeme_key: c.key, lemma: c.lemma, pos: c.pos, gloss: c.gloss,
@@ -73,14 +90,15 @@ export function applyCorrections(a: SentenceAnalysis, tokens: Token[], correctio
     if (!tok?.id) return;
     const corr = corrections.get(tok.id);
     if (!corr) return;
-    const p = corr.payload as Partial<Candidate> & { chosenLemma?: string };
+    const p = corr.payload as Partial<Candidate>;
     const base = chosen(at);
     const fixed: Candidate = {
-      key: (p.key as string) ?? (p.lemma ? `${p.lemma}|${p.pos ?? base?.pos ?? 'unknown'}` : base?.key ?? `?${at.norm}|unknown`),
+      key: (p.key as string) ?? (p.lemma ? `?${p.pos ?? base?.pos ?? 'unknown'}:${p.lemma}` : base?.key ?? `?unknown:${at.norm}`),
       lemma: (p.lemma as string) ?? base?.lemma ?? at.norm,
+      lemmaAccented: (p.lemmaAccented as string) ?? base?.lemmaAccented,
       pos: (p.pos as Candidate['pos']) ?? base?.pos ?? 'unknown',
       gloss: (p.gloss as string) ?? base?.gloss ?? '',
-      entry: base?.entry,
+      senses: base?.senses,
       features: { ...(base?.features ?? {}), ...((p.features as Candidate['features']) ?? {}) },
       morphemes: (p.morphemes as Candidate['morphemes']) ?? base?.morphemes ?? [{ text: at.norm, role: 'stem', gloss: 'corrected', start: 0, end: at.norm.length }],
       notes: [...(base?.notes ?? []), 'corrected by you' + (corr.note ? ': ' + corr.note : '')],
@@ -113,6 +131,16 @@ export async function ensureChapterAnalysis(bookId: number, chapterId: number, o
   const sentenceCorrections = new Map<number, UserCorrection>();
   for (const c of sentCorrRows) if (typeof c.target_id === 'number') sentenceCorrections.set(c.target_id, c);
 
+  // dictionary data for every word key in the chapter: a bundled library book (book.slug set)
+  // fetches its own pre-built per-work bundle (forms + core lexemes) in one shot; an imported
+  // text falls back to the per-shard loader, since it has no bundle of its own.
+  const book = await db.books.get(bookId);
+  const allTokens = Array.from(tokensBySentence.values()).flat();
+  if (book?.slug) await preloadWork(book.slug);
+  else await preloadForms(allTokens.filter((t) => t.kind === 'word').map((t) => t.key));
+  const characters = await db.characters.where('book_id').equals(bookId).toArray();
+  const ctx = buildContext(characters);
+
   const existing = await db.analysis_versions.where('[book_id+chapter_id]').equals([bookId, chapterId]).toArray();
   const current = existing.find((v) => v.engine_version === currentVersionTag());
   const version = current?.version ?? (existing.length ? Math.max(...existing.map((v) => v.version)) + 1 : 1);
@@ -124,7 +152,8 @@ export async function ensureChapterAnalysis(bookId: number, chapterId: number, o
   const dependencyRows: Dependency[] = [];
   for (const s of sentences) {
     const toks = tokensBySentence.get(s.id!) ?? [];
-    const a = analyzeSentence(toks.map((t) => ({ text: t.surface_original, kind: t.kind, id: t.id })));
+    const input: SentenceInput[] = toks.map((t) => ({ text: t.surface_original, kind: t.kind, id: t.id, sourceStress: t.source_stress }));
+    const a = analyzeSentence(input, ctx);
     applyCorrections(a, toks, corrections);
     result.sentences.set(s.id!, a);
     if (!current || opts.force) {

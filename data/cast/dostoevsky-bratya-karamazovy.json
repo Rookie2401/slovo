@@ -1,0 +1,119 @@
+[
+  {
+    "canonical": "Фёдор Павлович Карамазов",
+    "given": "Фёдор",
+    "patronymic": "Павлович",
+    "surname": "Карамазов",
+    "forms": [
+      { "form": "Карамазов", "kind": "surname" },
+      { "form": "Карамазова", "kind": "surname" },
+      { "form": "Карамазову", "kind": "surname" },
+      { "form": "Федор Павлович", "kind": "full", "note": "this edition prints ё as е" }
+    ],
+    "role": "the dissolute father, murdered — the crime the novel turns on",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Дмитрий Фёдорович Карамазов",
+    "given": "Дмитрий",
+    "patronymic": "Фёдорович",
+    "surname": "Карамазов",
+    "forms": [
+      { "form": "Дмитрий", "kind": "given" },
+      { "form": "Дмитрия", "kind": "given" },
+      { "form": "Дмитрию", "kind": "given" },
+      { "form": "Митя", "kind": "diminutive", "note": "his usual name — the eldest brother" },
+      { "form": "Мити", "kind": "diminutive" },
+      { "form": "Митю", "kind": "diminutive" },
+      { "form": "Митей", "kind": "diminutive" },
+      { "form": "Митенька", "kind": "diminutive" }
+    ],
+    "role": "the eldest brother, passionate and reckless, tried for their father's murder",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Иван Фёдорович Карамазов",
+    "given": "Иван",
+    "patronymic": "Фёдорович",
+    "surname": "Карамазов",
+    "forms": [
+      { "form": "Иван", "kind": "given" },
+      { "form": "Ивана", "kind": "given" },
+      { "form": "Ивану", "kind": "given" }
+    ],
+    "role": "the intellectual middle brother, tormented by doubt",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Алексей Фёдорович Карамазов",
+    "given": "Алексей",
+    "patronymic": "Фёдорович",
+    "surname": "Карамазов",
+    "forms": [
+      { "form": "Алексей", "kind": "given" },
+      { "form": "Алексея", "kind": "given" },
+      { "form": "Алеша", "kind": "diminutive", "note": "his usual name — the youngest brother; this edition prints ё as е" },
+      { "form": "Алеши", "kind": "diminutive" },
+      { "form": "Алешу", "kind": "diminutive" },
+      { "form": "Алешей", "kind": "diminutive" }
+    ],
+    "role": "the youngest brother, a novice monk — the novel's moral center",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Павел Фёдорович Смердяков",
+    "given": "Павел",
+    "surname": "Смердяков",
+    "forms": [
+      { "form": "Смердяков", "kind": "surname" },
+      { "form": "Смердякова", "kind": "surname" },
+      { "form": "Смердякову", "kind": "surname" }
+    ],
+    "role": "the old man's servant and (implied) illegitimate son, who actually kills him",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Аграфена Александровна Светлова",
+    "given": "Аграфена",
+    "patronymic": "Александровна",
+    "surname": "Светлова",
+    "forms": [
+      { "form": "Грушенька", "kind": "diminutive", "note": "her usual name" },
+      { "form": "Грушеньки", "kind": "diminutive" },
+      { "form": "Грушеньку", "kind": "diminutive" },
+      { "form": "Груша", "kind": "diminutive" }
+    ],
+    "role": "the woman both Fyodor Pavlovich and Dmitri are infatuated with",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Катерина Ивановна Верховцева",
+    "given": "Катерина",
+    "patronymic": "Ивановна",
+    "surname": "Верховцева",
+    "forms": [
+      { "form": "Катерина Ивановна", "kind": "full" },
+      { "form": "Катя", "kind": "diminutive" }
+    ],
+    "role": "Dmitri's proud fiancée, later drawn to Ivan",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Зосима",
+    "given": "Зосима",
+    "forms": [
+      { "form": "Зосима", "kind": "given" },
+      { "form": "Зосимы", "kind": "given" }
+    ],
+    "role": "the revered monastery elder, Alyosha's spiritual guide",
+    "source": "manual",
+    "confidence": 1
+  }
+]

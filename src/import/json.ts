@@ -5,7 +5,7 @@ import { ImportRefused } from './types';
 const Paragraph = z.union([
   z.string(),
   z.object({
-    kind: z.enum(['text', 'heading', 'subheading', 'verse', 'quote', 'note']).optional(),
+    kind: z.enum(['text', 'heading', 'subheading', 'verse', 'quote', 'note', 'letter']).optional(),
     text: z.string(),
     emphasis: z.array(z.object({ start: z.number().int().min(0), end: z.number().int().min(0), kind: z.enum(['em', 'strong']) })).optional(),
   }),
@@ -16,10 +16,11 @@ export const CorpusSchema = z.object({
   author: z.string().optional(),
   language: z.string().optional(),
   license: z.string().optional(),
-  source_format: z.enum(['json', 'sample']).optional(),
+  source_format: z.enum(['json', 'library']).optional(),
   chapters: z.array(
     z.object({
       title: z.string(),
+      part: z.string().optional(),
       source_ref: z.string().optional(),
       paragraphs: z.array(Paragraph),
     }),
@@ -29,7 +30,7 @@ export const CorpusSchema = z.object({
 export type CorpusJson = z.infer<typeof CorpusSchema>;
 
 /**
- * JSON corpus: { title, author?, chapters: [{ title, paragraphs: [string | {kind, text, emphasis}] }] }
+ * JSON corpus: { title, author?, chapters: [{ title, part?, paragraphs: [string | {kind, text, emphasis}] }] }
  */
 export function importJson(raw: string | unknown, opts: { sourceName?: string } = {}): ImportedBook {
   let data: unknown = raw;
@@ -45,6 +46,7 @@ export function importJson(raw: string | unknown, opts: { sourceName?: string } 
   const c = parsed.data;
   const chapters = c.chapters.map((ch) => ({
     title: ch.title,
+    part: ch.part,
     source_ref: ch.source_ref,
     paragraphs: ch.paragraphs.map((p) => (typeof p === 'string' ? { kind: 'text' as const, text: p } : { kind: p.kind ?? 'text', text: p.text, emphasis: p.emphasis })),
   }));

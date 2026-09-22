@@ -1,5 +1,10 @@
 # Слово (V0)
 
+**Live: https://rookie2401.github.io/slovo/** — the `gh-pages` branch of
+[Rookie2401/slovo](https://github.com/Rookie2401/slovo) holds the built site (`dist/`, including
+the public-domain library and the dictionary); `main` is the source. Redeploy: `npm run build`,
+then copy `dist/` into an orphan `gh-pages` worktree and push it.
+
 A local-first Russian literary reader — Dostoevsky and Tolstoy in the original, with a
 linguistic apparatus underneath, and a reading ladder that starts with Tolstoy's own graded
 readers for children and ends with *Братья Карамазовы* and *Война и мир*.

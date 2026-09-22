@@ -1,0 +1,43 @@
+{
+  "name": "slovo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Слово — a Russian literary reader (Dostoevsky & Tolstoy) with a linguistic apparatus underneath (V0).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "corpus:fetch": "node scripts/fetch-corpus.mjs",
+    "corpus:build": "node scripts/build-corpus.mjs",
+    "dict:fetch": "node scripts/fetch-dictionary.mjs",
+    "dict:build": "node scripts/build-dictionary.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "dexie": "^4",
+    "jszip": "^3.10.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.3",
+    "zod": "^4"
+  },
+  "devDependencies": {
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "fake-indexeddb": "^6",
+    "jsdom": "^26",
+    "sharp": "^0.35.4",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^3.2.7",
+    "@fontsource/pt-serif": "^5.3.0",
+    "@fontsource/noto-sans": "^5.3.0"
+  }
+}

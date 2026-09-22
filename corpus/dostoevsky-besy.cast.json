@@ -1,0 +1,97 @@
+[
+  {
+    "canonical": "Николай Всеволодович Ставрогин",
+    "given": "Николай",
+    "patronymic": "Всеволодович",
+    "surname": "Ставрогин",
+    "forms": [
+      { "form": "Ставрогин", "kind": "surname" },
+      { "form": "Ставрогина", "kind": "surname" },
+      { "form": "Ставрогину", "kind": "surname" },
+      { "form": "Николай Всеволодович", "kind": "full" }
+    ],
+    "role": "a charismatic, morally void nobleman at the novel's center",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Степан Трофимович Верховенский",
+    "given": "Степан",
+    "patronymic": "Трофимович",
+    "surname": "Верховенский",
+    "forms": [
+      { "form": "Степан Трофимович", "kind": "full", "note": "his usual reference — given name + patronymic" },
+      { "form": "Верховенский", "kind": "surname" },
+      { "form": "Верховенского", "kind": "surname" }
+    ],
+    "role": "an aging liberal idealist, Stavrogin's former tutor",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Пётр Степанович Верховенский",
+    "given": "Пётр",
+    "patronymic": "Степанович",
+    "surname": "Верховенский",
+    "forms": [
+      { "form": "Петр Степанович", "kind": "full", "note": "this edition prints ё as е" }
+    ],
+    "role": "Stepan Trofimovich's son, the nihilist conspirator driving the plot",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Варвара Петровна Ставрогина",
+    "given": "Варвара",
+    "patronymic": "Петровна",
+    "surname": "Ставрогина",
+    "forms": [
+      { "form": "Варвара Петровна", "kind": "full" }
+    ],
+    "role": "Stavrogin's imperious, wealthy mother",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Иван Павлович Шатов",
+    "given": "Иван",
+    "patronymic": "Павлович",
+    "surname": "Шатов",
+    "forms": [
+      { "form": "Шатов", "kind": "surname" },
+      { "form": "Шатова", "kind": "surname" },
+      { "form": "Шатову", "kind": "surname" }
+    ],
+    "role": "a former radical turned Slavophile, murdered by the conspirators",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Алексей Нилыч Кириллов",
+    "given": "Алексей",
+    "patronymic": "Нилыч",
+    "surname": "Кириллов",
+    "forms": [
+      { "form": "Кириллов", "kind": "surname" },
+      { "form": "Кириллова", "kind": "surname" },
+      { "form": "Кириллову", "kind": "surname" }
+    ],
+    "role": "an engineer obsessed with the philosophical necessity of his own suicide",
+    "source": "manual",
+    "confidence": 1
+  },
+  {
+    "canonical": "Лизавета Николаевна Тушина",
+    "given": "Лизавета",
+    "patronymic": "Николаевна",
+    "surname": "Тушина",
+    "forms": [
+      { "form": "Лиза", "kind": "diminutive", "note": "her usual name" },
+      { "form": "Лизы", "kind": "diminutive" },
+      { "form": "Лизу", "kind": "diminutive" }
+    ],
+    "role": "a proud young woman entangled with Stavrogin",
+    "source": "manual",
+    "confidence": 1
+  }
+]
